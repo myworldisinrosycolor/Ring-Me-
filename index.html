@@ -1,507 +1,426 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="RingMe!">
-<meta name="theme-color" content="#FDF6F0">
-<title>RingMe!</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Caveat:wght@600;700&family=Fredoka+One&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;background:#FDF6F0;font-family:'Baloo 2',cursive;overscroll-behavior:none}
-#app{max-width:430px;margin:0 auto;min-height:100%;position:relative;overflow-x:hidden}
-button{font-family:'Baloo 2',cursive;cursor:pointer;border:none;outline:none;background:none;padding:0}
-input,textarea{font-family:'Baloo 2',cursive;outline:none;border:none}
-.screen{display:none;padding:20px;padding-bottom:100px;min-height:100vh}
-.screen.active{display:block}
-.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(253,246,240,0.95);backdrop-filter:blur(10px);border-top:2.5px dashed #FCD34D;display:flex;justify-content:around;padding:12px 6px;z-index:90}
-.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;color:#9CA3AF;font-size:12px;font-weight:700;transition:all 0.2s}
-.nav-btn.active{color:#EC4899;transform:scale(1.08)}
-.card{background:#FFF;border:2.5px solid #FBCFE8;border-radius:24px;box-shadow:0 8px 0 #FBCFE8;padding:16px;margin-bottom:20px;position:relative}
-.btn-primary{background:#EC4899;color:#FFF;border:2.5px solid #BE185D;box-shadow:0 4px 0 #BE185D;border-radius:18px;padding:10px 20px;font-weight:700;font-size:15px;display:inline-block;transition:all 0.1s}
-.btn-primary:active{transform:translateY(3px);box-shadow:0 1px 0 #BE185D}
-.dial-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:280px;margin:0 auto}
-.dial-btn{background:#FFF;border:2.5px solid #C084FC;box-shadow:0 4px 0 #C084FC;width:64px;height:64px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#6B21A8}
-.dial-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #C084FC}
-.pulse{animation:pulseAnim 2s infinite}
-@keyframes pulseAnim{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RingMe - Retro Connection</title>
+  <style>
+    /* 1. อัปเกรด Palette สีให้เป็นสไตล์ Claude พาสเทลสดใส และปรับปรุง Typography */
+    :root {
+      --bg-pastel: #FFF0F6; /* สีพื้นหลังชมพูพาสเทลอ่อน */
+      --card-bg: #FFFFFF;
+      --primary: #FF85A2;   /* สีชมพูหลัก */
+      --secondary: #B3E5FC; /* สีฟ้าพาสเทล */
+      --accent: #D4EDDA;    /* สีเขียวมิ้นท์พาสเทล */
+      --text-dark: #2B2D42;
+      --text-muted: #8D99AE;
+      --border-color: #F0E4DA;
+      --shadow-color: #E0C3FC;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    body { background: #1a1a2e; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
+    
+    #app {
+      width: 100%;
+      max-width: 430px;
+      height: 100vh;
+      max-height: 932px;
+      background: var(--bg-pastel);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      color: var(--text-dark);
+      box-shadow: 0 0 40px rgba(0,0,0,0.5);
+    }
+
+    /* ตกแต่ง Background Blobs ให้ฟุ้งละมุนยิ่งขึ้น */
+    .blob {
+      position: absolute; width: 350px; height: 350px;
+      border-radius: 50%; filter: blur(70px); opacity: 0.5; z-index: 0;
+    }
+    .blob-1 { top: -80px; left: -80px; background: #FFC0CB; }
+    .blob-2 { bottom: -80px; right: -80px; background: #98FB98; }
+
+    #screen { flex: 1; overflow-y: auto; z-index: 1; padding: 20px; padding-bottom: 90px; }
+    
+    /* 2. ดีไซน์การ์ดและปุ่มกดให้มีความโค้งมนและมีมิติเงาหนา (Retro-Pop Style) */
+    .card {
+      background: var(--card-bg);
+      border-radius: 24px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 2px solid var(--border-color);
+      box-shadow: 0 8px 0 var(--border-color);
+      position: relative;
+      z-index: 1;
+    }
+
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #E05780;
+      transition: all 0.1s ease;
+      display: inline-block;
+      text-align: center;
+    }
+    .btn:active { transform: translateY(4px); box-shadow: 0 0px 0 #E05780; }
+
+    /* โครงสร้าง UI ชิ้นส่วนอื่นๆ */
+    #nav {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 75px;
+      background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px);
+      display: flex; justify-content: space-around; align-items: center;
+      border-top: 1px solid var(--border-color); z-index: 10; padding-bottom: 15px;
+    }
+    .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 11px; color: var(--text-muted); cursor: pointer; }
+    .nav-item.active { color: var(--primary); font-weight: bold; }
+    .nav-item span { font-size: 22px; margin-bottom: 2px; }
+
+    /* Rotary Dial Styles */
+    .dial-container { display: flex; justify-content: center; margin: 20px 0; }
+    .dial-wheel {
+      width: 220px; height: 220px; border-radius: 50%;
+      background: #333; border: 8px solid #444; position: relative;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3); touch-action: none;
+    }
+    .dial-center-hole {
+      position: absolute; top: 70px; left: 70px; width: 80px; height: 80px;
+      border-radius: 50%; background: #222; border: 4px solid var(--primary);
+      display: flex; justify-content: center; align-items: center; color: white; font-weight: bold;
+    }
+    .dial-hole {
+      position: absolute; width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(255,255,255,0.2); border: 2px solid white;
+      display: flex; justify-content: center; align-items: center;
+      color: white; font-weight: bold; font-size: 14px; cursor: pointer;
+    }
+    .dial-stop {
+      position: absolute; bottom: 32px; right: 48px; width: 12px; height: 24px;
+      background: #888; border-radius: 4px; z-index: 5;
+    }
+
+    /* Call Screen Overlays */
+    #call-overlay {
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(43, 45, 66, 0.95); z-index: 100; color: white;
+      display: none; flex-direction: column; justify-content: space-between; padding: 60px 30px; text-align: center;
+    }
+    .avatar-large { width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--primary); margin: 0 auto 20px; object-fit: cover; }
+    
+    /* Photo Storage / Scrapbook styling */
+    .scrapbook-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+    .polaroid {
+      background: white; padding: 10px 10px 25px 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      transform: rotate(-3deg); border: 1px solid #ddd; text-align: center;
+    }
+    .polaroid:nth-child(even) { transform: rotate(3deg); }
+    .polaroid img { width: 100%; height: 130px; object-fit: cover; background: #eee; margin-bottom: 8px; }
+    .polaroid p { font-family: 'Courier New', Courier, monospace; font-size: 12px; color: #444; font-weight: bold; }
+  </style>
 </head>
 <body>
-<div id="app"></div>
+
+<div id="app">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div id="screen"></div>
+  <div id="nav"></div>
+  <div id="call-overlay"></div>
+</div>
 
 <script>
-// ── Core State ───────────────────────────────────────────────────
-var S = {
-  tab: 'time',
-  user: { name: 'You', city: 'London', tz: 'Europe/London', photo: '🌸' },
-  friends: [
-    { id: '1', name: 'Mochi', city: 'Tokyo', tz: 'Asia/Tokyo', photo: '🧸', flowerSeed: 'sunflower', flowerStreak: 2, flowerWatered: false, lastWatered: '' },
-    { id: '2', name: 'Bento', city: 'São Paulo', tz: 'America/Sao_Paulo', photo: '🦊', flowerSeed: 'tulip', flowerStreak: 0, flowerWatered: false, lastWatered: '' }
-  ],
-  board: [
-    { id: 'b1', author: 'Mochi', text: 'Just finished a matcha latte! Missing our chats.', tag: 'life', time: '2h ago', color: '#FEF3C7', rot: '-2deg' },
-    { id: 'b2', author: 'You', text: 'Working on a new secret project today ✨', tag: 'project', time: 'Just now', color: '#E0F2FE', rot: '3deg' }
-  ],
-  prompts: {
-    current: "What's one small thing that made you smile today?",
-    answers: { 'You': "Found a retro cafe!", 'Mochi': "A cute dog barked at me joyfully." }
-  },
-  dialCode: '',
-  calling: false,
-  callTimer: '00:00'
-};
-
-// ── LOCAL STORAGE ENGINE ─────────────────────────────────────────
-// ตรวจสอบตู้เซฟความจำจำลองว่ามีข้อมูลที่บันทึกไว้คราวก่อนไหม
-if (localStorage.getItem('ringme_state_v1')) {
-  try {
-    S = JSON.parse(localStorage.getItem('ringme_state_v1'));
-  } catch(e) {
-    console.log("Error loading state, using defaults");
-  }
-}
-
-// ฟังก์ชันสำหรับบันทึกข้อมูลทุกครั้งที่มีการกดอัปเดตแอป
-function saveToLocalStorage() {
-  localStorage.setItem('ringme_state_v1', JSON.stringify(S));
-}
-
-// ── DOM Helpers ──────────────────────────────────────────────────
-function el(tag, props, children) {
-  var d = document.createElement(tag);
-  if(props) {
-    if(props.cls) d.className = props.cls;
-    if(props.txt) d.textContent = props.txt;
-    if(props.html) d.innerHTML = props.html;
-    if(props.css) { for(var k in props.css) d.style[k] = props.css[k]; }
-    if(props.attr) { for(var a in props.attr) d.setAttribute(a, props.attr[a]); }
-    if(props.on) { for(var e in props.on) d.addEventListener(e, props.on[e]); }
-  }
-  if(children) {
-    if(Array.isArray(children)) {
-      for(var i=0; i<children.length; i++) { if(children[i]) d.appendChild(children[i]); }
-    } else if(children instanceof HTMLElement) {
-      d.appendChild(children);
+  // ตัวช่วยสร้าง DOM Element เปล่า (Pure JS ES5 Style)
+  function mk(t, a, c) {
+    var el = document.createElement(t);
+    if (a) { for (var k in a) { el.setAttribute(k, a[k]); } }
+    if (c) {
+      if (!Array.isArray(c)) c = [c];
+      c.forEach(function(ch) {
+        if (typeof ch === 'string') el.appendChild(document.createTextNode(ch));
+        else if (ch) el.appendChild(ch);
+      });
     }
+    return el;
   }
-  return d;
-}
-function div(p,c){return el('div',p,c)}
-function btn(p,c){return el('button',p,c)}
-function img(p){return el('img',p)}
+  function div(a, c) { return mk('div', a, c); }
+  function btn(a, c) { return mk('button', a, c); }
 
-// ── Render Master ────────────────────────────────────────────────
-function render() {
-  // บันทึกความจำลง LocalStorage โดยอัตโนมัติทุกครั้งก่อนประกอบหน้าเว็บใหม่
-  saveToLocalStorage();
+  // ---------------- SENSITIVE DATA RESTRICTION & STATE MANAGEMENT ----------------
+  // โหลดข้อมูลเริ่มต้น และใช้ข้อมูลสมมติเพื่อความเป็นส่วนตัวของผู้ใช้งาน (ตามนโยบายความเป็นส่วนตัว)
+  var defaultState = {
+    tab: 'prompts',
+    me: { name: "คุณ (Me)", code: "44", meet: "https://meet.google.com/abc-defg-hij", photo: "" },
+    friends: [
+      { id: 1, name: "แอน (Ann)", code: "11", meet: "https://meet.google.com/aaa-bbbb-ccc", photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" },
+      { id: 2, name: "บ๊อบ (Bob)", code: "22", meet: "https://meet.google.com/ddd-eeee-fff", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150" },
+      { id: 3, name: "เคท (Kate)", code: "33", meet: "https://meet.google.com/ggg-hhhh-iii", photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" }
+    ],
+    promptIndex: 0,
+    answers: {},
+    scrapbook: [] // ชิ้นส่วนเก็บรูปความทรงจำโพลารอยด์
+  };
 
-  var app = document.getElementById('app');
-  app.innerHTML = '';
-  
-  var body = div({css:{paddingBottom:'100px'}});
-  
-  if(S.tab === 'time') renderTimeTab(body);
-  else if(S.tab === 'flowers') renderFlowersTab(body);
-  else if(S.tab === 'board') renderBoardTab(body);
-  else if(S.tab === 'prompts') renderPromptsTab(body);
-  else if(S.tab === 'settings') renderSettingsTab(body);
-  
-  app.appendChild(body);
-  app.appendChild(buildNav());
-}
+  var S = JSON.parse(localStorage.getItem('ringme_state')) || defaultState;
 
-function buildNav() {
-  var tabs = [
-    {id:'time',lbl:'Time',icon:'📞'},
-    {id:'flowers',lbl:'Flowers',icon:'🌸'},
-    {id:'board',lbl:'Board',icon:'📌'},
-    {id:'prompts',lbl:'Prompts',icon:'💬'},
-    {id:'settings',lbl:'Setup',icon:'⚙️'}
+  // ข้อ 1: ฟังก์ชันเซฟข้อมูลถาวร (Local Storage) ป้องกันข้อมูลหายตอน Refresh หน้าเว็บ
+  function saveData() {
+    localStorage.setItem('ringme_state', JSON.stringify(S));
+  }
+
+  var promptsData = [
+    { q: "เพลงไหนที่คุณฟังซ้ำบ่อยที่สุดในสัปดาห์นี้?", a1: "เจ็บจนพอ - แอน", a2: "สายตาหลอกกันไม่ได้ - บ๊อบ", a3: "โต๊ะริม - เคท" },
+    { q: "เมนูเครื่องดื่มคลายร้อนที่คุณสั่งบ่อยที่สุดคืออะไร?", a1: "ชาไทยเย็นหวานน้อย - แอน", a2: "อเมริกาโน่น้ำส้ม - บ๊อบ", a3: "มัทฉะลาเต้ - เคท" }
   ];
-  return div({cls:'nav'}, tabs.map(function(t){
-    var act = S.tab === t.id;
-    return btn({
-      cls: 'nav-btn' + (act ? ' active' : ''),
-      on: { click: function() { S.tab = t.id; render(); } }
-    }, [
-      div({css:{fontSize:'24px',marginBottom:'2px'},txt:t.icon}),
-      div({txt:t.lbl})
-    ]);
-  }));
-}
 
-// ── Screen 1: TIME & CALLS ───────────────────────────────────────
-function renderTimeTab(body) {
-  body.appendChild(div({css:{textAlign:'center',padding:'10px 0 20px'}}, [
-    div({css:{fontSize:'32px',fontWeight:'800',color:'#EC4899'},txt:'RingMe! Overlap'}),
-    div({css:{fontSize:'14px',color:'#9CA3AF'},txt:'Finding sweet moments to connect across the world'})
-  ]));
+  var dialCodeBuffer = "";
 
-  if(S.calling) {
-    renderActiveCall(body);
-    return;
+  function goTab(t) {
+    S.tab = t;
+    saveData();
+    renderNav();
+    renderScreen();
   }
 
-  // Visual Hemisphere Sync Card
-  body.appendChild(div({cls:'card',css:{background:'linear-gradient(to bottom, #EFF6FF, #FFF)'}}, [
-    div({css:{fontSize:'15px',fontWeight:'700',color:'#1E40AF',marginBottom:'8px'},txt:'🌍 Hemisphere Sync'}),
-    div({css:{display:'flex',justifyContent:'space-between',alignItems:'center'}}, [
-      div({css:{textAlign:'center',flex:1}}, [
-        div({css:{fontSize:'24px'},txt:S.user.photo}),
-        div({css:{fontWeight:'700',fontSize:'13px'},txt:'Eastern'}),
-        div({css:{fontSize:'11px',color:'#6B7280'},txt:S.user.name})
-      ]),
-      div({css:{fontSize:'18px',color:'#93C5FD',fontWeight:'800'},txt:'⇄'}),
-      div({css:{textAlign:'center',flex:1}}, [
-        div({css:{fontSize:'24px'},txt:'🤝'}),
-        div({css:{fontWeight:'700',fontSize:'13px',color:'#10B981'},txt:'Overlap Found'}),
-        div({css:{fontSize:'11px',color:'#10B981',fontWeight:'600'},txt:'Sat-Sun Best'})
-      ]),
-      div({css:{fontSize:'18px',color:'#93C5FD',fontWeight:'800'},txt:'⇄'}),
-      div({css:{textAlign:'center',flex:1}}, [
-        div({css:{fontSize:'24px'},txt:S.friends[1].photo}),
-        div({css:{fontWeight:'700',fontSize:'13px'},txt:'Western'}),
-        div({css:{fontSize:'11px',color:'#6B7280'},txt:S.friends[1].name})
-      ])
-    ])
-  ]));
+  // ---------------- UI RENDERING ----------------
 
-  // Golden Windows Recommendations
-  body.appendChild(div({cls:'card'}, [
-    div({css:{fontSize:'15px',fontWeight:'700',color:'#EC4899',marginBottom:'12px'},txt:'✨ Recommended Weekend Call Windows'}),
-    renderWindowItem("🎯 Slot 1: Golden Window (Best!)", "Saturday Afternoon", "03:00 PM - 05:00 PM (Your time)", "08:00 AM - 10:00 AM (Their time)"),
-    renderWindowItem("☕ Slot 2: Cozy Catch-up", "Sunday Morning", "09:00 AM - 11:00 AM (Your time)", "11:00 PM - 01:00 AM (Their time)"),
-    renderWindowItem("🌙 Slot 3: Pillow Talk", "Sunday Evening", "09:30 PM - 11:00 PM (Your time)", "11:30 AM - 01:00 PM (Their time)")
-  ]));
-
-  // Vintage Rotary Dial Interface
-  body.appendChild(div({cls:'card',css:{textAlign:'center',background:'#FAF5FF',borderColor:'#E9D5FF',boxShadow:'0 8px 0 #E9D5FF'}}, [
-    div({css:{fontSize:'16px',fontWeight:'700',color:'#6B21A8',marginBottom:'4px'},txt:'☎️ Rotary Call Connection'}),
-    div({css:{fontSize:'12px',color:'#9333EA',marginBottom:'16px'},txt:'Enter custom room code to call your friends via private line'}),
-    div({css:{background:'#FFF',border:'2px solid #E9D5FF',borderRadius:'16px',padding:'12px',fontSize:'24px',fontWeight:'800',letterSpacing:'4px',color:'#6B21A8',maxWidth:'200px',margin:'0 auto 20px',minHeight:'55px'},txt:S.dialCode}),
-    
-    // Keypad grid
-    div({cls:'dial-pad'}, [
-      ['1',''], ['2','abc'], ['3','def'],
-      ['4','ghi'], ['5','jkl'], ['6','mno'],
-      ['7','pqrs'], ['8','tuv'], ['9','wxyz'],
-      ['✖','clear'], ['0','+'], ['📞','call']
-    ].map(function(k){
-      return btn({
-        cls:'dial-btn',
-        on:{click:function(){ handleDialInput(k[0]); }}
-      }, [
-        div({txt:k[0]}),
-        div({css:{fontSize:'9px',color:'#A855F7',fontWeight:'600',marginTop:'-4px'},txt:k[1]})
+  function renderNav() {
+    var nav = document.getElementById('nav');
+    nav.innerHTML = '';
+    var items = [
+      { id: 'prompts', icon: '📝', label: 'คำถาม' },
+      { id: 'dial', icon: '☎️', label: 'หมุนสาย' },
+      { id: 'scrapbook', icon: '📸', label: 'บันทึก' },
+      { id: 'setup', icon: '⚙️', label: 'ตั้งค่า' }
+    ];
+    items.forEach(function(i) {
+      var itemEl = div({ class: 'nav-item' + (S.tab === i.id ? ' active' : '') }, [
+        mk('span', {}, i.icon),
+        div({}, i.label)
       ]);
-    }))
-  ]));
-}
-
-function renderWindowItem(title, day, mine, theirs) {
-  return div({css:{background:'#FFF5F5',borderRadius:'16px',padding:'10px 14px',marginBottom:'10px',border:'1.5px solid #FEE2E2'}}, [
-    div({css:{fontWeight:'700',fontSize:'13px',color:'#991B1B'},txt:title}),
-    div({css:{fontSize:'12px',fontWeight:'600',color:'#DC2626'},txt:day}),
-    div({css:{display:'flex',justifyContent:'space-between',marginTop:'4px',fontSize:'11px',color:'#4B5563'}}, [
-      div({html:'<strong>You:</strong> ' + mine}),
-      div({html:'<strong>Them:</strong> ' + theirs})
-    ])
-  ]);
-}
-
-function handleDialInput(val) {
-  if(val === '✖') {
-    S.dialCode = '';
-  } else if(val === '📞') {
-    if(S.dialCode.length > 0) {
-      S.calling = true;
-      S.callTimer = '00:00';
-    }
-  } else {
-    if(S.dialCode.length < 6) S.dialCode += val;
+      itemEl.onclick = function() { goTab(i.id); };
+      nav.appendChild(itemEl);
+    });
   }
-  render();
-}
 
-function renderActiveCall(body) {
-  body.appendChild(div({cls:'card',css:{textAlign:'center',background:'#111827',borderColor:'#374151',boxShadow:'0 8px 0 #374151',color:'#FFF',padding:'40px 20px'}}, [
-    div({cls:'pulse',css:{fontSize:'64px',marginBottom:'16px'},txt:'📱'}),
-    div({css:{fontSize:'22px',fontWeight:'800',color:'#10B981',marginBottom:'4px'},txt:'Connected Line'}),
-    div({css:{fontSize:'14px',color:'#9CA3AF',marginBottom:'24px'},txt:'Room Code: ' + S.dialCode}),
+  function renderScreen() {
+    var scr = document.getElementById('screen');
+    scr.innerHTML = '';
+
+    if (S.tab === 'prompts') {
+      renderPromptsTab(scr);
+    } else if (S.tab === 'dial') {
+      renderDialTab(scr);
+    } else if (S.tab === 'scrapbook') {
+      renderScrapbookTab(scr);
+    } else if (S.tab === 'setup') {
+      renderSetupTab(scr);
+    }
+  }
+
+  function renderPromptsTab(scr) {
+    var p = promptsData[S.promptIndex] || promptsData[0];
     
-    // Simulate Video Feed grid
-    div({css:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:30}}, [
-      div({css:{background:'#374151',borderRadius:16,padding:20,height:120,display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center'}}, [
-        div({css:{fontSize:32},txt:S.user.photo}),
-        div({css:{fontSize:11,color:'#9CA3AF',marginTop:6},txt:'You (Camera On)'})
-      ]),
-      div({css:{background:'#374151',borderRadius:16,padding:20,height:120,display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center'}}, [
-        div({cls:'pulse',css:{fontSize:32},txt:'🤝'}),
-        div({css:{fontSize:11,color:'#9CA3AF',marginTop:6},txt:'Waiting for Friend...'})
-      ])
-    ]),
+    var card = div({ class: 'card' }, [
+      div({ style: 'font-size: 14px; font-weight: bold; color: var(--primary); margin-bottom: 8px;' }, 'คำถามประจำสัปดาห์ ✨'),
+      div({ style: 'font-size: 18px; font-weight: bold; line-height: 1.4;' }, p.q)
+    ]);
+
+    var ansList = div({ style: 'margin-top: 15px;' });
+    var choices = [ {f: S.friends[0], txt: p.a1}, {f: S.friends[1], txt: p.a2}, {f: S.friends[2], txt: p.a3} ];
     
-    btn({
-      cls:'btn-primary',
-      css:{background:'#EF4444',borderColor:'#991B1B',boxShadow:'0 4px 0 #991B1B'},
-      txt:'Disconnect',
-      on:{click:function(){ S.calling=false; S.dialCode=''; render(); }}
-    })
-  ]));
-}
-
-// ── Screen 2: FLOWERS (STREAK SYSTEM) ────────────────────────────
-function renderFlowersTab(body) {
-  body.appendChild(div({css:{textAlign:'center',padding:'10px 0 20px'}}, [
-    div({css:{fontSize:32,fontWeight:'800',color:'#EC4899'},txt:'Friendship Garden'}),
-    div({css:{fontSize:14,color:'#9CA3AF'},txt:'Water your garden daily to unlock secret species together'})
-  ]));
-
-  // Gacha Seed Box
-  body.appendChild(div({cls:'card',css:{background:'linear-gradient(135deg,#FEF3C7,#FFF)',borderColor:'#FCD34D',boxShadow:'0 8px 0 #FCD34D',textAlign:'center'}}, [
-    div({css:{fontSize:16,fontWeight:700,color:'#92400E',marginBottom:4},txt:'🎁 Gacha Mystery Seed'}),
-    div({css:{fontSize:12,color:'#B45309',marginBottom:12},txt:'Draw a special flower seed to surprise your long-distance bestie!'}),
-    btn({
-      cls:'btn-primary',
-      css:{background:'#F59E0B',borderColor:'#B45309',boxShadow:'0 4px 0 #B45309'},
-      txt:'Draw Secret Seed',
-      on:{click:function(){ alert("🎉 You found a rare 'Starlight Tulip' seed! It has been added to your inventory."); }}
-    })
-  ]));
-
-  // Loop through friends flowers status
-  S.friends.forEach(function(f){
-    var pct = Math.min((f.flowerStreak / 3) * 100, 100);
-    body.appendChild(div({cls:'card'}, [
-      div({css:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}, [
-        div({css:{display:'flex',alignItems:'center',gap:8}}, [
-          div({css:{fontSize:20},txt:f.photo}),
-          div({}, [
-            div({css:{fontWeight:700,fontSize:14},txt:'Garden with ' + f.name}),
-            div({css:{fontSize:11,color:'#6B7280'},txt:'Seed: ' + f.flowerSeed.toUpperCase()})
-          ])
-        ]),
-        div({css:{background:'#F3E8FF',color:'#6B21A8',fontSize:11,fontWeight:700,padding:'2px 8px',borderRadius:12},txt:f.flowerStreak + '/3 Days Streak 🔥'})
-      ]),
+    choices.forEach(function(c) {
+      var row = div({ 
+        style: 'background: white; border: 2px solid var(--border-color); border-radius: 16px; padding: 12px; margin-bottom: 10px; display: flex; align-items: center; cursor: pointer; box-shadow: 0 4px 0 var(--border-color);' 
+      }, [
+        c.f.photo ? mk('img', { src: c.f.photo, style: 'width: 32px; height: 32px; border-radius: 50%; margin-right: 12px; object-fit: cover;' }) : div({ style: 'font-size: 24px; margin-right: 12px;' }, '👤'),
+        div({ style: 'flex: 1;' }, [
+          div({ style: 'font-size: 11px; color: var(--text-muted);' }, c.f.name),
+          div({ style: 'font-size: 14px; font-weight: 500;' }, c.txt)
+        ])
+      ]);
       
-      // Visual flower rendering based on streak
-      div({css:{background:'#FFF7ED',borderRadius:16,height:130,display:'flex',justifyContent:'center',alignItems:'center',position:'relative',marginBottom:12,border:'1px solid #FFEDD5'}}, [
-        renderFlowerSVG(f.flowerStreak),
-        div({css:{position:'absolute',bottom:8,left:12,fontSize:11,color:'#9A3412',fontWeight:600},txt:f.flowerStreak === 3 ? '🎉 Fully Grown!' : '🌱 Needs ' + (3 - f.flowerStreak) + ' more check-ins'})
-      ]),
-
-      // Water interactive button
-      btn({
-        cls:'btn-primary',
-        css:{width:'100%',background:f.flowerWatered ? '#9CA3AF':'#3B82F6',borderColor:f.flowerWatered ? '#4B5563':'#1D4ED8',boxShadow:f.flowerWatered ? '0 4px 0 #4B5563':'0 4px 0 #1D4ED8'},
-        txt: f.flowerWatered ? '💦 Already Watered Today' : '💦 Check-in & Water Flower',
-        on:{click:function(){
-          if(!f.flowerWatered){
-            f.flowerWatered = true;
-            f.flowerStreak = Math.min(f.flowerStreak + 1, 3);
-            render();
-          }
-        }}
-      })
-    ]));
-  });
-}
-
-function renderFlowerSVG(streak) {
-  if(streak === 0) {
-    return div({css:{fontSize:28}}, [div({txt:'🫘'}), div({css:{fontSize:11,color:'#9CA3AF'},txt:'Planted Now'})]);
-  }
-  if(streak === 1) {
-    return div({css:{fontSize:36,animation:'pulseAnim 3s infinite'}}, [div({txt:'🌱'})]);
-  }
-  if(streak === 2) {
-    return div({css:{fontSize:44,animation:'pulseAnim 2.5s infinite'}}, [div({txt:'🌿'})]);
-  }
-  return div({css:{textAlign:'center'}}, [
-    div({css:{fontSize:56,animation:'pulseAnim 2s infinite'},txt:'🌸'}),
-    div({css:{fontSize:12,fontWeight:700,color:'#EC4899'},txt:'Beautiful Bloom'})
-  ]);
-}
-
-// ── Screen 3: CORKBOARD (CATEGORIZED UPDATE WALL) ────────────────
-function renderBoardTab(body) {
-  body.appendChild(div({css:{textAlign:'center',padding:'10px 0 20px'}}, [
-    div({css:{fontSize:32,fontWeight:'800',color:'#EC4899'},txt:'The Update Board'}),
-    div({css:{fontSize:14,color:'#9CA3AF'},txt:'Pin snippets of your life for your close friends to find'})
-  ]));
-
-  // Post new note input box
-  body.appendChild(div({cls:'card',css:{padding:14}}, [
-    div({css:{fontSize:13,fontWeight:700,color:'#4B5563',marginBottom:6},txt:'📌 Stick a new update on the board...'}),
-    el('textarea',{
-      attr:{placeholder:'Share a mini life update, feeling, or cozy note...',rows:2},
-      css:{width:'100%',background:'#FDF6F0',borderRadius:12,padding:10,fontSize:13,border:'1.5px solid #FBCFE8',resize:'none'}
-    }),
-    div({css:{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:8}}, [
-      div({css:{display:'flex',gap:6}}, ['life','love','project'].map(function(tag){
-        return btn({cls:'tag-select',css:{fontSize:11,fontWeight:700,background:'#F3F4F6',color:'#4B5563',padding:'3px 8px',borderRadius:8},txt:'#'+tag});
-      })),
-      btn({
-        cls:'btn-primary',
-        css:{padding:'6px 14px',fontSize:12},
-        txt:'Pin Note',
-        on:{click:function(){
-          var ta = document.querySelector('textarea');
-          if(ta && ta.value.trim().length > 0){
-            S.board.unshift({
-              id: 'b'+Date.now(),
-              author: 'You',
-              text: ta.value,
-              tag: 'life',
-              time: 'Just now',
-              color: '#FEF3C7',
-              rot: '1deg'
-            });
-            ta.value = '';
-            render();
-          }
-        }}
-      })
-    ])
-  ]));
-
-  // Render Corkboard Items Grid
-  var grid = div({css:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}});
-  S.board.forEach(function(item){
-    grid.appendChild(div({css:{background:item.color,border:'1.5px solid #E5E7EB',boxShadow:'2px 4px 0 rgba(0,0,0,0.05)',borderRadius:16,padding:12,transform:'rotate('+item.rot+')',display:'flex',flexDirection:'column',justifyContent:'space-between',minHeight:110}}, [
-      div({}, [
-        div({css:{display:'flex',justifyContent:'space-between',fontSize:11,fontWeight:700,color:'#9CA3AF',marginBottom:4}}, [
-          div({txt:item.author}),
-          div({css:{color:'#EC4899'},txt:'#'+item.tag})
-        ]),
-        div({css:{fontSize:12,color:'#374151',lineHeight:1.4,fontWeight:500},txt:item.text})
-      ]),
-      div({css:{fontSize:9,color:'#9CA3AF',textAlign:'right',marginTop:6},txt:item.time})
-    ]));
-  });
-  body.appendChild(grid);
-}
-
-// ── Screen 4: PROMPTS (POLAROID & BADGES REWARDS) ────────────────
-function renderPromptsTab(body) {
-  body.appendChild(div({css:{textAlign:'center',padding:'10px 0 20px'}}, [
-    div({css:{fontSize:32,fontWeight:'800',color:'#EC4899'},txt:'Cozy Prompts'}),
-    div({css:{fontSize:14,color:'#9CA3AF'},txt:'Answer deep context prompts together to unlock memories'})
-  ]));
-
-  // Current Active Prompt Card
-  body.appendChild(div({cls:'card',css:{background:'linear-gradient(to right, #FAF5FF, #FFF)',borderColor:'#E9D5FF'}}, [
-    div({css:{background:'#D8B4FE',color:'#581C87',fontSize:10,fontWeight:800,padding:'2px 8px',borderRadius:8,display:'inline-block',marginBottom:6},txt:'WEEKLY QUESTION'}),
-    div({css:{fontSize:16,fontWeight:800,color:'#581C87',lineHeight:1.4,marginBottom:12},txt:'"'+S.prompts.current+'"'}),
-    
-    // Type answer field
-    el('input',{
-      attr:{type:'text',placeholder:'Type your answer here...',value: S.prompts.answers['You']||''},
-      css:{width:'100%',background:'#FFF',border:'1.5px solid #E9D5FF',borderRadius:12,padding:10,fontSize:13,marginBottom:10},
-      on:{change:function(e){ S.prompts.answers['You'] = e.target.value; render(); }}
-    }),
-    btn({cls:'btn-primary',css:{width:'100%',background:'#A855F7',borderColor:'#7E22CE',boxShadow:'0 4px 0 #7E22CE'},txt:'Submit Answer'})
-  ]));
-
-  // Answer Comparison / Polaroid Unlock Frame
-  body.appendChild(div({cls:'card',css:{background:'#FFF',borderColor:'#E5E7EB',boxShadow:'0 8px 0 #E5E7EB',padding:14}}, [
-    div({css:{fontSize:14,fontWeight:700,color:'#374151',marginBottom:12},txt:'Polaroid Timeline Unlocked 📸'}),
-    
-    // Polaroid Mock Canvas
-    div({css:{background:'#F9FAFB',border:'1px solid #E5E7EB',padding:'10px 10px 24px',boxShadow:'0 4px 6px rgba(0,0,0,0.05)',maxWidth:'240px',margin:'0 auto 16px',textAlign:'center'}}, [
-      div({css:{background:'#E2E8F0',height:160,borderRadius:8,display:'flex',justifyContent:'center',alignItems:'center',fontSize:44},txt:'🌈'}),
-      div({css:{fontFamily:"'Caveat',cursive",fontSize:18,marginTop:10,color:'#4B5563',fontWeight:700},txt:'Unlocked Milestone Badge'})
-    ]),
-
-    // History dialogue stream
-    div({css:{borderTop:'1.5px dashed #E5E7EB',paddingTop:12}}, [
-      renderPromptBubble("You", S.prompts.answers['You'] || "Thinking of an answer..."),
-      renderPromptBubble("Mochi", S.prompts.answers['Mochi'])
-    ])
-  ]));
-}
-
-function renderPromptBubble(who, text) {
-  return div({css:{marginBottom:8,fontSize:12}}, [
-    span({css:{fontWeight:700,color:'#EC4899',marginRight:6},txt:who+':'}),
-    span({css:{color:'#4B5563',fontStyle:'italic'},txt:text})
-  ]);
-}
-function span(p,c){return el('span',p,c)}
-
-// ── Screen 5: SETTINGS & BACKEND SIMULATION ─────────────────────
-function renderSettingsTab(body) {
-  body.appendChild(div({css:{textAlign:'center',padding:'10px 0 20px'}}, [
-    div({css:{fontSize:32,fontWeight:'800',color:'#EC4899'},txt:'App Configuration'}),
-    div({css:{fontSize:14,color:'#9CA3AF'},txt:'Customize your global presence and manage links'})
-  ]));
-
-  // User Profile configuration block
-  body.appendChild(div({cls:'card'}, [
-    div({css:{fontSize:15,fontWeight:700,color:'#374151',marginBottom:10},txt:'👤 Your Global Identity'}),
-    div({css:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:10}}, [
-      div({}, [
-        div({css:{fontSize:11,fontWeight:700,color:'#6B7280',marginBottom:4},txt:'Display Name'}),
-        el('input',{attr:{type:'text',value:S.user.name},css:{width:'100%',background:'#F3F4F6',borderRadius:10,padding:8,fontSize:12},on:{change:function(e){S.user.name=e.target.value;render();}}})
-      ]),
-      div({}, [
-        div({css:{fontSize:11,fontWeight:700,color:'#6B7280',marginBottom:4},txt:'Profile Avatar'}),
-        el('input',{attr:{type:'text',value:S.user.photo},css:{width:'100%',background:'#F3F4F6',borderRadius:10,padding:8,fontSize:12},on:{change:function(e){S.user.photo=e.target.value;render();}}})
-      ])
-    ]),
-    div({}, [
-      div({css:{fontSize:11,fontWeight:700,color:'#6B7280',marginBottom:4},txt:'Your Current City Location'}),
-      el('input',{attr:{type:'text',value:S.user.city},css:{width:'100%',background:'#F3F4F6',borderRadius:10,padding:8,fontSize:12},on:{change:function(e){S.user.city=e.target.value;render();}}})
-    ])
-  ]));
-
-  // Sync P2P Invite URL block
-  body.appendChild(div({cls:'card',css:{background:'#F0FDF4',borderColor:'#BBF7D0'}}, [
-    div({css:{fontSize:15,fontWeight:700,color:'#166534',marginBottom:4},txt:'🔗 Peer-to-Peer Invite Link'}),
-    div({css:{fontSize:12,color:'#15803D',marginBottom:12},txt:'Share this secure instant parameter link to link devices seamlessly with your friend'}),
-    btn({
-      cls:'btn-primary',
-      css:{width:'100%',background:'#22C55E',borderColor:'#166534',boxShadow:'0 4px 0 #166534'},
-      txt:'Generate Shareable URL',
-      on:{click:function(){ alert("📋 URL copied to clipboard! Share it with your friend to connect instantly."); }}
-    })
-  ]));
-
-  // General Application parameters
-  body.appendChild(div({cls:'card',css:{textAlign:'center',padding:'28px 22px'}}, [
-    div({css:{fontSize:'52px',marginBottom:'10px'},txt:'📞'}),
-    div({css:{fontSize:'28px',color:'#EC4899',fontFamily:"'Fredoka One',cursive",textShadow:'2px 3px 0 #F9A8D4',marginBottom:'4px'},txt:'RingMe!'}),
-    div({css:{fontSize:'13px',color:'#9CA3AF',marginBottom:'16px'},txt:'The long-distance friendship app'}),
-    div({css:{background:'#FFF0F6',borderRadius:'16px',padding:'12px',fontSize:'13px',fontFamily:"'Caveat',cursive",color:'#9D174D',lineHeight:'1.6',fontWeight:'600'},txt:'Made with 💕 for friends who are far apart but close at heart'})
-  ]));
-  body.appendChild(div({css:{background:'linear-gradient(135deg,#FFF7ED,#FEF3C7)',border:'1.5px solid #FCD34D',borderRadius:'20px',padding:'16px 18px'}}, [
-    div({css:{fontSize:'13px',fontWeight:'700',color:'#92400E',marginBottom:'10px'},txt:'📱 Install on your home screen!'}),
-    div({css:{fontSize:'13px',color:'#6B7280',lineHeight:'1.8'},html:'<strong style="color:#92400E">iPhone:</strong> Open in Safari → Share → "Add to Home Screen"<br><strong style="color:#92400E">Android:</strong> Open in Chrome → ⋮ menu → "Add to Home Screen"'}),
-    div({css:{marginTop:'10px',fontSize:'12px',color:'#C084FC',fontWeight:'600'},txt:'✨ Works exactly like an app!'})
-  ]));
-}
-
-// ── Initial Render ───────────────────────────────────────────────
-render();
-setInterval(function(){
-  if(S.tab==='time'){
-    var now=new Date();
-    var clockStr=now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-    var clocks = document.querySelectorAll('.screen .hdr div div');
-    if(clocks && clocks.length > 0) {
-      for(var i=0; i<clocks.length; i++) {
-        if(clocks[i].textContent.indexOf(':') !== -1) {
-          clocks[i].textContent = clockStr;
+      row.onclick = function() {
+        alert("คุณทายคำตอบของ " + c.f.name + " แล้ว! ลองไปที่หน้า 'หมุนสาย' แล้วใส่รหัสของเพื่อนเพื่อโทรหาดูนะ!");
+        // ข้อ 4: ระบบปลดล็อกรูปโพลารอยด์เข้าสู่ความทรงจำ
+        var photoUrl = c.f.photo || "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=300";
+        var isExist = S.scrapbook.some(function(item) { return item.ans === c.txt; });
+        if(!isExist) {
+          S.scrapbook.push({ name: c.f.name, ans: c.txt, photo: photoUrl });
+          saveData();
         }
+      };
+      ansList.appendChild(row);
+    });
+
+    scr.appendChild(card);
+    scr.appendChild(ansList);
+  }
+
+  // ข้อ 3: ปรับปรุงแอนิเมชันตอนเหวี่ยงวงล้อกลับ (Spin Back Animation) ให้สมจริง
+  function renderDialTab(scr) {
+    dialCodeBuffer = "";
+    
+    var infoCard = div({ class: 'card', style: 'text-align: center;' }, [
+      div({ style: 'font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);' }, 'ป้อนรหัสเพื่อติดต่อ'),
+      div({ id: 'dial-display', style: 'font-size: 36px; font-weight: bold; color: var(--primary); margin: 10px 0; letter-spacing: 4px; min-height: 44px;' }, '_ _')
+    ]);
+    
+    scr.appendChild(infoCard);
+    
+    var dialWheel = div({ class: 'dial-wheel' });
+    var centerHole = div({ class: 'dial-center-hole' }, 'RING');
+    dialWheel.appendChild(centerHole);
+    dialWheel.appendChild(div({ class: 'dial-stop' }));
+    
+    var radius = 76;
+    var holesData = [
+      { n: '1', a: 30 }, { n: '2', a: 60 }, { n: '3', a: 90 },
+      { n: '4', a: 120 }, { n: '5', a: 150 }, { n: '6', a: 180 },
+      { n: '7', a: 210 }, { n: '8', a: 240 }, { n: '9', a: 270 },
+      { n: '0', a: 300 }
+    ];
+    
+    holesData.forEach(function(h) {
+      var rad = (h.a - 90) * Math.PI / 180;
+      var x = 110 + radius * Math.cos(rad) - 18;
+      var y = 110 + radius * Math.sin(rad) - 18;
+      
+      var hole = div({
+        class: 'dial-hole',
+        style: 'left:' + x + 'px; top:' + y + 'px;',
+        'data-num': h.n
+      }, h.n);
+      
+      // เมื่อจิ้มหมายเลข จะจำลองการหมุนกลับแบบเบาๆ นุ่มนวล (Cubic-Bezier Style)
+      hole.onclick = function() {
+        dialWheel.style.transition = "transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)";
+        dialWheel.style.transform = "rotate(" + (360 - h.a) + "deg)";
+        
+        setTimeout(function() {
+          dialWheel.style.transition = "transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)";
+          dialWheel.style.transform = "rotate(0deg)";
+          
+          dialCodeBuffer += h.n;
+          document.getElementById('dial-display').innerText = dialCodeBuffer;
+          
+          if(dialCodeBuffer.length >= 2) {
+            checkCallCode(dialCodeBuffer);
+          }
+        }, 400);
+      };
+      
+      dialWheel.appendChild(hole);
+    });
+    
+    var container = div({ class: 'dial-container' }, dialWheel);
+    scr.appendChild(container);
+
+    // รายชื่อเพื่อนและรหัสแนะแนวสั้นๆ ด้านล่าง
+    var tip = div({ style: 'text-align:center; font-size:12px; color: var(--text-muted); margin-top:10px;' }, 'รหัสติดต่อด่วน: แอน (11), บ๊อบ (22), เคท (33)');
+    scr.appendChild(tip);
+  }
+
+  function renderScrapbookTab(scr) {
+    scr.appendChild(div({ style: 'font-size: 20px; font-weight: bold; margin-bottom: 10px;' }, '📸 บันทึกความทรงจำ'));
+    
+    if(S.scrapbook.length === 0) {
+      scr.appendChild(div({ class: 'card', style: 'text-align:center; color: var(--text-muted);' }, 'ยังไม่มีรูปภาพบันทึก ทายคำตอบในแถบแรกเพื่อปลดล็อกโพราลอยด์กัน!'));
+      return;
+    }
+
+    var grid = div({ class: 'scrapbook-grid' });
+    S.scrapbook.forEach(function(item) {
+      var polaroid = div({ class: 'polaroid' }, [
+        mk('img', { src: item.photo }),
+        mk('p', {}, item.name),
+        div({ style: 'font-size: 10px; color:#777; margin-top:2px;' }, item.ans)
+      ]);
+      grid.appendChild(polaroid);
+    });
+    scr.appendChild(grid);
+  }
+
+  function renderSetupTab(scr) {
+    scr.appendChild(div({ style: 'font-size: 20px; font-weight: bold; margin-bottom: 15px;' }, '⚙️ ตั้งค่าห้องสนทนา'));
+    
+    var card = div({ class: 'card' }, [
+      div({ style: 'font-weight: bold; margin-bottom: 5px; font-size:14px;' }, 'ลิงก์ Google Meet ประจำตัวของคุณ:'),
+      mk('input', { id: 'my-meet-input', type: 'text', value: S.me.meet, style: 'width:100%; padding:10px; border:2px solid var(--border-color); border-radius:12px; margin-bottom:15px;' }),
+      
+      btn({ class: 'btn', style: 'width:100%;' }, 'บันทึกข้อมูลการตั้งค่า')
+    ]);
+
+    card.querySelector('.btn').onclick = function() {
+      var val = document.getElementById('my-meet-input').value;
+      if(val) {
+        S.me.meet = val;
+        saveData();
+        alert('บันทึกการตั้งค่าลิงก์คุยสำเร็จแล้วครับ! 🎉');
       }
+    };
+
+    scr.appendChild(card);
+  }
+
+  // ---------------- CALL LOGIC & OVERLAY ----------------
+
+  function checkCallCode(code) {
+    var target = null;
+    S.friends.forEach(function(f) { if (f.code === code) target = f; });
+    
+    if (target) {
+      showCallOverlay(target);
+    } else {
+      alert("ไม่พบหมายเลขปลายทางที่คุณระบุ กรุณาลองใหม่อีกครั้ง");
+      dialCodeBuffer = "";
+      var disp = document.getElementById('dial-display');
+      if (disp) disp.innerText = '_ _';
     }
   }
-}, 1000);
+
+  function showCallOverlay(friend) {
+    var overlay = document.getElementById('call-overlay');
+    overlay.innerHTML = '';
+    overlay.style.display = 'flex';
+    
+    var topPart = div({}, [
+      div({ style: 'font-size: 14px; text-transform: uppercase; letter-spacing: 2px; color: var(--primary); margin-bottom: 10px;' }, 'กำลังต่อสายภายในระบบ...'),
+      friend.photo ? mk('img', { src: friend.photo, class: 'avatar-large' }) : div({ style: 'font-size: 64px; margin-bottom: 20px;' }, '👤'),
+      div({ style: 'font-size: 24px; font-weight: bold;' }, friend.name),
+      div({ style: 'font-size: 14px; color: var(--text-muted); margin-top: 5px;' }, 'Connected via RingMe Server')
+    ]);
+    
+    // ข้อ 3: การดึงห้อง Meet มาเปิดแบบ Dynamic Link
+    var meetBtn = btn({ class: 'btn', style: 'background:#28a745; box-shadow: 0 4px 0 #1e7e34; width:100%; padding:14px; margin-bottom:15px; font-size:16px;' }, '🟢 เปิดคุยสาย (Google Meet)');
+    meetBtn.onclick = function() {
+      window.open(friend.meet, '_blank');
+    };
+
+    var hangupBtn = btn({ class: 'btn', style: 'background:#dc3545; box-shadow: 0 4px 0 #bd2130; width:100%; padding:14px; font-size:16px;' }, '🔴 วางสายโทรศัพท์');
+    hangupBtn.onclick = function() {
+      overlay.style.display = 'none';
+      dialCodeBuffer = "";
+      var disp = document.getElementById('dial-display');
+      if (disp) disp.innerText = '_ _';
+    };
+
+    var btmPart = div({}, [meetBtn, hangupBtn]);
+    
+    overlay.appendChild(topPart);
+    overlay.appendChild(btmPart);
+  }
+
+  // เริ่มต้นทำงานแอปพลิเคชันครั้งแรก
+  renderNav();
+  renderScreen();
 </script>
+
 </body>
 </html>
