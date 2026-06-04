@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RingMe! 📞</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Caveat:wght@600;700&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#FDF6F0;font-family:'Baloo 2',cursive;overflow-x:hidden}
+button{font-family:'Baloo 2',cursive;cursor:pointer;border:none;outline:none;background:none;padding:0}
+input,textarea{font-family:'Caveat',cursive;outline:none;border:none;background:transparent;resize:none;-webkit-appearance:none;width:100%}
+a{text-decoration:none;color:inherit}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#F0E4DA;border-radius:3px}
+
+/* ── LAYOUT ── */
+#shell{display:flex;flex-direction:column;min-height:100vh}
+#topbar{position:sticky;top:0;z-index:30;background:rgba(253,246,240,.97);backdrop-filter:blur(16px);border-bottom:1.5px solid #F0E4DA;display:flex;align-items:center;gap:0;padding:0 32px}
+#topbar .logo{font-family:'Fredoka One',cursive;font-size:22px;color:#EC4899;padding:14px 0;margin-right:32px;white-space:nowrap;letter-spacing:.5px}
+#topbar .logo span{font-size:13px;color:#9CA3AF;font-family:'Baloo 2',cursive;font-weight:600;margin-left:6px}
+#topnav{display:flex;gap:4px;flex:1}
+.ntab{display:flex;align-items:center;gap:8px;padding:10px 20px;border-radius:12px;font-size:14px;font-weight:700;color:#9CA3AF;cursor:pointer;border:none;background:none;transition:all .15s;position:relative;white-space:nowrap}
+.ntab:hover{color:#3B1F0F;background:#F9F5F2}
+.ntab.on{color:#EC4899;background:#FFF0F6}
+.ntab .nicon{font-size:18px}
+.nbadge{background:#EC4899;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;position:absolute;top:6px;right:10px}
+#main{flex:1;padding:32px;max-width:1400px;width:100%;margin:0 auto}
+
+/* ── CARDS & PANELS ── */
+.card{background:#fff;border-radius:20px;border:1.5px solid #F0E4DA;padding:22px 24px}
+.panel-grid{display:grid;gap:22px}
+.pg-2{grid-template-columns:repeat(2,1fr)}
+.pg-3{grid-template-columns:repeat(3,1fr)}
+.pg-4{grid-template-columns:repeat(4,1fr)}
+.pg-1-2{grid-template-columns:1fr 2fr}
+.pg-2-1{grid-template-columns:2fr 1fr}
+.pg-3-2{grid-template-columns:3fr 2fr}
+@media(max-width:900px){.pg-2,.pg-3,.pg-4,.pg-1-2,.pg-2-1,.pg-3-2{grid-template-columns:1fr}}
+
+/* ── TYPOGRAPHY ── */
+.ey{font-size:11px;letter-spacing:3px;color:#C084FC;font-weight:700;text-transform:uppercase;margin-bottom:4px}
+.pt{font-size:28px;font-weight:800;color:#2D1810;line-height:1.2}
+.sl{font-size:11px;letter-spacing:2px;color:#9CA3AF;font-weight:700;text-transform:uppercase;margin-bottom:10px}
+.sec-title{font-size:18px;font-weight:800;color:#2D1810;margin-bottom:16px}
+
+/* ── BUTTONS ── */
+.btn-pink{background:linear-gradient(135deg,#F9A8D4,#FBCFE8);border:2px solid #EC4899;border-radius:32px;padding:13px 28px;font-size:15px;font-weight:800;color:#9D174D;box-shadow:0 4px 0 #F472B6;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:all .12s;cursor:pointer}
+.btn-pink:hover{transform:translateY(-2px);box-shadow:0 6px 0 #F472B6}
+.btn-pink:active{transform:translateY(2px);box-shadow:0 2px 0 #F472B6}
+.btn-outline{background:#fff;border:2px solid #F9A8D4;border-radius:32px;padding:11px 24px;font-size:14px;font-weight:800;color:#EC4899;transition:all .12s;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.btn-outline:hover{background:#FFF0F6}
+.btn-danger{background:#fff;border:2px solid #FCA5A5;border-radius:32px;padding:11px 24px;font-size:14px;font-weight:800;color:#DC2626;transition:all .12s;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.btn-danger:hover{background:#FFF1F2}
+.tab-btn{flex:1;padding:9px 8px;border-radius:20px;font-size:13px;font-weight:500;color:#9CA3AF;border:2px solid #F0E4DA;background:#fff;transition:all .15s;cursor:pointer}
+.tab-btn.on{font-weight:800;border-color:#F9A8D4;background:#FFF0F6;color:#EC4899}
+
+/* ── OVERLAYS ── */
+.mbg{position:fixed;inset:0;z-index:50;background:rgba(45,24,16,.5);display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+.msh{background:#FDF6F0;border-radius:24px 24px 0 0;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;padding:28px 28px 48px}
+.ovl{position:fixed;inset:0;z-index:100;overflow-y:auto;background:rgba(253,240,236,.97);backdrop-filter:blur(16px)}
+
+/* ── DIAL ── */
+.dial-wrap{position:relative;width:260px;height:260px;flex-shrink:0}
+.dial-body{position:absolute;inset:0;border-radius:50%;background:linear-gradient(145deg,#FFB6C1,#FF69B4);box-shadow:0 8px 32px rgba(255,105,180,.45),inset 0 2px 8px rgba(255,255,255,.5)}
+.dial-disc{position:absolute;top:14px;left:14px;right:14px;bottom:14px;border-radius:50%;background:linear-gradient(145deg,#FFC0CB,#FFB6C1);box-shadow:inset 0 4px 16px rgba(0,0,0,.15)}
+.dial-hole{position:absolute;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.85);box-shadow:inset 0 2px 6px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#C85A6E;cursor:pointer;user-select:none;transition:box-shadow .1s}
+.dial-hole:hover{box-shadow:inset 0 2px 6px rgba(0,0,0,.3),0 0 0 4px rgba(255,105,180,.3)}
+.dial-ctr{position:absolute;top:35%;left:35%;right:35%;bottom:35%;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.15);pointer-events:none}
+.dial-stop{position:absolute;right:7px;top:50%;transform:translateY(-50%);width:16px;height:28px;background:#FF69B4;border-radius:4px 4px 12px 12px}
+
+/* ── BOARD (corkboard) ── */
+.cb{background:#C8956C;border-radius:16px;padding:22px 16px 28px;box-shadow:inset 0 2px 12px rgba(0,0,0,.2);border:6px solid #A0714A}
+.pin-card{background:#fff;border-radius:4px;padding:22px 16px 16px;box-shadow:0 4px 12px rgba(0,0,0,.1);position:relative}
+.tape{position:absolute;width:48px;height:18px;border-radius:3px;background:rgba(255,240,200,.75);border:1px solid rgba(200,180,120,.3)}
+
+/* ── SETUP WIZARD ── */
+#setup-screen{position:fixed;inset:0;z-index:200;background:#FDF6F0;display:flex;align-items:center;justify-content:center;overflow-y:auto;padding:32px}
+.wizard-card{background:#fff;border-radius:28px;border:2px solid #F0E4DA;padding:44px 48px;max-width:580px;width:100%;box-shadow:0 20px 60px rgba(200,120,100,.12);animation:slideUp .4s ease}
+.wizard-step{display:none}
+.wizard-step.active{display:block}
+.step-dots{display:flex;gap:8px;justify-content:center;margin-bottom:28px}
+.step-dot{width:10px;height:10px;border-radius:50%;background:#F0E4DA;transition:all .3s}
+.step-dot.on{background:#EC4899;width:28px;border-radius:5px}
+.w-inp{width:100%;font-size:22px;font-family:'Caveat',cursive;font-weight:700;color:#2D1810;border-bottom:2.5px solid #F9A8D4;padding:8px 4px;background:transparent;margin-top:14px;margin-bottom:8px}
+.w-inp:focus{border-bottom-color:#EC4899}
+.w-hint{font-size:12px;color:#9CA3AF;margin-top:4px}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
+@keyframes cardIn{from{transform:translateY(100%)}to{transform:none}}
+@keyframes petalPop{0%{transform:scale(0);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+@keyframes floatUp{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes wiggle{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+@keyframes ringBounce{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(12deg)}}
+@keyframes pulseMeet{0%,100%{box-shadow:0 8px 0 #1558B0}50%{box-shadow:0 8px 0 #1558B0,0 0 0 18px rgba(26,115,232,0)}}
+@keyframes badgePop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+@keyframes seedWig{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+</style>
+</head>
+<body>
+<div id="setup-screen"></div>
+<div id="shell" style="display:none">
+  <header id="topbar">
+    <div class="logo">📞 RingMe! <span>long-distance cockpit</span></div>
+    <nav id="topnav"></nav>
+    <div id="clock-badge" style="margin-left:auto;background:#3B1F0F;color:#FDF6F0;border-radius:20px;padding:6px 16px;font-size:14px;font-weight:700;white-space:nowrap"></div>
+  </header>
+  <main id="main"></main>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+//  STORAGE KEY
+// ════════════════════════════════════════════════════════════
+var LS_KEY = 'ringme_profile_v1';
+
+function loadProfile(){
+  try{ var d=localStorage.getItem(LS_KEY); return d?JSON.parse(d):null; }catch(e){return null;}
+}
+function saveProfile(p){
+  try{ localStorage.setItem(LS_KEY,JSON.stringify(p)); }catch(e){}
+}
+function clearProfile(){
+  try{ localStorage.removeItem(LS_KEY); }catch(e){}
+}
+
+// ════════════════════════════════════════════════════════════
+//  APP STATE
+// ════════════════════════════════════════════════════════════
+var S = {
+  tab:'time',
+  me:{name:'You',emoji:'🌺',city:'My City',birthday:'Jun 15',bio:'Long-distance friendship curator 🌸',flower:'daisy',color:'#A5B4FC'},
+  friends:[
+    {id:1,name:'Mia',  emoji:'🌸',city:'London',   tz:'Europe/London',    color:'#F9A8D4',soft:'#FFF0F6',flower:'rose',    bday:'Mar 14'},
+    {id:2,name:'Yuki', emoji:'🌷',city:'Tokyo',    tz:'Asia/Tokyo',       color:'#86EFAC',soft:'#F0FDF4',flower:'cherry',  bday:'Jul 22'},
+    {id:3,name:'Sofia',emoji:'🌻',city:'São Paulo',tz:'America/Sao_Paulo',color:'#FCD34D',soft:'#FFFBEB',flower:'sunflower',bday:'Nov 3'}
+  ],
+  meetLink:'https://meet.google.com/new',
+  sendCount:1,
+  inbox:[
+    {id:1,fid:1,flower:'daisy',   note:'Thinking of you! 🌼',time:'2h ago', read:false},
+    {id:2,fid:2,flower:'lavender',note:'Miss you so much 💜',  time:'1d ago', read:true},
+    {id:3,fid:3,flower:'hibiscus',note:"You're amazing! 🌺",   time:'3d ago', read:true}
+  ],
+  garden:[
+    {id:1,flower:'daisy',   from:'Mia', date:'Feb 28'},
+    {id:2,flower:'lavender',from:'Yuki',date:'Feb 27'}
+  ],
+  slots:{},
+  badges:{campfire:false,'og-friends':true,'weekly-duo':true,'memory-keeper':false,comedian:false},
+  pins:[
+    {id:1,auth:'Mia',  ae:'🌸',cat:'crush',  col:'#F9A8D4',bg:'#FFF0F6',txt:"There's this person at my coffee shop who remembered my order! I am normal about this.",time:'2d ago',likes:2,liked:false,rot:-3,tape:'left'},
+    {id:2,auth:'Yuki', ae:'🌷',cat:'project',col:'#86EFAC',bg:'#F0FDF4',txt:'Learning pottery!! My first bowl looks like a sad taco but I am obsessed 🏺',            time:'3d ago',likes:3,liked:true, rot:2, tape:'right'},
+    {id:3,auth:'Sofia',ae:'🌻',cat:'thought',col:'#FCA5A5',bg:'#FFF1F2',txt:"Why do airports have moving walkways but regular sidewalks don't?? Wild.",               time:'4d ago',likes:1,liked:false,rot:-2,tape:'center'},
+    {id:4,auth:'Mia',  ae:'🌸',cat:'life',   col:'#A5B4FC',bg:'#EEF2FF',txt:"Finally finished the book I've been reading since JANUARY. I cried. Not sad crying.",    time:'5d ago',likes:2,liked:false,rot:3, tape:'left'},
+    {id:5,auth:'Yuki', ae:'🌷',cat:'moment', col:'#FCD34D',bg:'#FFFBEB',txt:'The cherry blossoms are absolutely insane right now in Tokyo 🌸',                        time:'6d ago',likes:4,liked:true, rot:-1,tape:'right'}
+  ],
+  pAnswered:{w2:'Laughing until we cried'},
+  pDone:['w2'],
+  ftab:'send',fSendFriend:0,fSendFlower:'',fNote:'',fSent:false,
+  callActive:false,callCode:'',callFriends:[],callSuccess:false,callDialed:[],
+  seedModal:null,
+  boardFilter:'all',boardPost:false,postCat:'',postTxt:'',
+  ptab:'weekly',pMode:'list',pActive:null,pWrite:'',pPolaroid:null,
+  stab:'me',sEditFriend:0,emojiPickFor:''
+};
+
+var MY_TZ=(function(){try{return Intl.DateTimeFormat().resolvedOptions().timeZone;}catch(e){return'UTC';}})();
+
+// ════════════════════════════════════════════════════════════
+//  SETUP WIZARD
+// ════════════════════════════════════════════════════════════
+var WIZARD = {step:1, name:'', city:'', tz:MY_TZ, emoji:'🌺', flower:'daisy', color:'#A5B4FC'};
+var WIZARD_STEPS = 6;
+
+function startApp(){
+  qs('setup-screen').style.display='none';
+  qs('shell').style.display='flex';
+  render();
+  setInterval(tickClock,1000);
+  tickClock();
+}
+
+function applyProfile(p){
+  S.me.name    = p.name   || S.me.name;
+  S.me.city    = p.city   || S.me.city;
+  S.me.emoji   = p.emoji  || S.me.emoji;
+  S.me.flower  = p.flower || S.me.flower;
+  S.me.color   = p.color  || S.me.color;
+}
+
+function launchSetup(){
+  qs('shell').style.display='none';
+  qs('setup-screen').style.display='flex';
+  WIZARD={step:1,name:'',city:'',tz:MY_TZ,emoji:'🌺',flower:'daisy',color:'#A5B4FC'};
+  renderWizard();
+}
+
+function init(){
+  var saved=loadProfile();
+  if(saved&&saved.name){
+    applyProfile(saved);
+    startApp();
+  } else {
+    launchSetup();
+  }
+}
+
+// ── Wizard renderer ──────────────────────────────────────────
+var EMOJIS=['🌺','🌸','🌼','🌻','🌷','💐','🌹','🪷','🍀','🌿','🍃','🌱','🦋','🐝','🌙','⭐','🌈','✨','💫','🎀','🎠','🍓','🍑','🫧'];
+var THEMES=[{name:'Lavender',v:'#A5B4FC'},{name:'Rose',v:'#F9A8D4'},{name:'Sage',v:'#86EFAC'},{name:'Butter',v:'#FCD34D'},{name:'Peach',v:'#FCA5A5'},{name:'Sky',v:'#7DD3FC'},{name:'Lilac',v:'#C4B5FD'},{name:'Mint',v:'#6EE7B7'}];
+var FLOWERS=[{id:'rose',name:'Rose',col:'#F9A8D4'},{id:'daisy',name:'Daisy',col:'#FDE68A'},{id:'tulip',name:'Tulip',col:'#FCA5A5'},{id:'lavender',name:'Lavender',col:'#C4B5FD'},{id:'sunflower',name:'Sunflower',col:'#FCD34D'},{id:'cherry',name:'Cherry Blossom',col:'#FBCFE8'},{id:'hibiscus',name:'Hibiscus',col:'#FB7185'},{id:'aster',name:'Aster',col:'#A78BFA'}];
+
+function renderWizard(){
+  var ss=qs('setup-screen');
+  ss.innerHTML='';
+  var wc=div({cls:'wizard-card'});
+
+  // Dots
+  var dots=div({cls:'step-dots'});
+  for(var i=1;i<=WIZARD_STEPS;i++) dots.appendChild(div({cls:'step-dot'+(WIZARD.step===i?' on':'')}));
+  wc.appendChild(dots);
+
+  var titles=["Let's meet you! 🌸","Where are you based? 📍","Pick your avatar ✨","Choose your theme colour 🎨","Your favourite flower 🌸","All set — let's go! 🚀"];
+  var subs=["What should your friends call you?","Your city helps us calculate time zones!","Tap your favourite emoji to use as your avatar.","This colour will highlight your profile across the app.","This is the flower your friends will send you most!","Your cosy long-distance cockpit is ready."];
+
+  wc.appendChild(div({css:{fontSize:'11px',letterSpacing:'3px',color:'#C084FC',fontWeight:'700',textTransform:'uppercase',marginBottom:'8px'},txt:'Step '+WIZARD.step+' of '+WIZARD_STEPS}));
+  wc.appendChild(div({css:{fontSize:'26px',fontWeight:'800',color:'#2D1810',marginBottom:'8px'},txt:titles[WIZARD.step-1]}));
+  wc.appendChild(div({css:{fontSize:'14px',color:'#9CA3AF',marginBottom:'28px'},txt:subs[WIZARD.step-1]}));
+
+  if(WIZARD.step===1){
+    var ni=mk('input',{type:'text',cls:'w-inp',placeholder:'e.g. Jasmine',maxlength:'24',value:WIZARD.name||'',input:function(e){WIZARD.name=e.target.value;}});
+    wc.appendChild(ni);
+    wc.appendChild(div({cls:'w-hint',txt:'Use whatever name feels right — a nickname works great!'}));
+    setTimeout(function(){var el=wc.querySelector('.w-inp');if(el)el.focus();},50);
+  }
+  if(WIZARD.step===2){
+    var ci=mk('input',{type:'text',cls:'w-inp',placeholder:'e.g. Bangkok, Thailand',maxlength:'32',value:WIZARD.city||'',input:function(e){WIZARD.city=e.target.value;}});
+    wc.appendChild(ci);
+    var tzi=mk('input',{type:'text',cls:'w-inp',placeholder:'e.g. Asia/Bangkok',maxlength:'48',value:WIZARD.tz||MY_TZ,input:function(e){WIZARD.tz=e.target.value;}});
+    wc.appendChild(div({css:{marginTop:'18px',fontSize:'13px',fontWeight:'700',color:'#9CA3AF'},txt:'Your timezone (IANA format):'}));
+    wc.appendChild(tzi);
+    wc.appendChild(div({cls:'w-hint',txt:'Your detected timezone: '+MY_TZ}));
+  }
+  if(WIZARD.step===3){
+    var eg=div({css:{display:'flex',flexWrap:'wrap',gap:'10px',marginBottom:'16px'}});
+    for(var i=0;i<EMOJIS.length;i++){
+      (function(e){
+        var b=btn({css:{width:'52px',height:'52px',borderRadius:'14px',background:WIZARD.emoji===e?'#FFF0F6':'#fff',border:'2px solid '+(WIZARD.emoji===e?'#EC4899':'#F0E4DA'),fontSize:'26px',display:'flex',alignItems:'center',justifyContent:'center',transition:'all .12s'},txt:e,click:function(){WIZARD.emoji=e;renderWizard();}});
+        eg.appendChild(b);
+      })(EMOJIS[i]);
+    }
+    wc.appendChild(eg);
+    wc.appendChild(div({css:{textAlign:'center',fontSize:'40px'},txt:'Selected: '+WIZARD.emoji}));
+  }
+  if(WIZARD.step===4){
+    var cg=div({css:{display:'flex',flexWrap:'wrap',gap:'14px',marginBottom:'16px'}});
+    for(var i=0;i<THEMES.length;i++){
+      (function(c){
+        var b=btn({css:{display:'flex',flexDirection:'column',alignItems:'center',gap:'6px'},click:function(){WIZARD.color=c.v;renderWizard();}});
+        b.appendChild(div({css:{width:'60px',height:'60px',borderRadius:'50%',background:'linear-gradient(135deg,'+c.v+'dd,'+c.v+'88)',border:'4px solid '+(WIZARD.color===c.v?c.v:'transparent'),boxShadow:WIZARD.color===c.v?'0 0 0 4px #fff,0 0 0 7px '+c.v:'0 2px 8px '+c.v+'44'}}));
+        b.appendChild(div({css:{fontSize:'11px',fontWeight:'700',color:WIZARD.color===c.v?c.v:'#9CA3AF'},txt:c.name}));
+        cg.appendChild(b);
+      })(THEMES[i]);
+    }
+    wc.appendChild(cg);
+  }
+  if(WIZARD.step===5){
+    var fg=div({css:{display:'flex',flexWrap:'wrap',gap:'12px',marginBottom:'8px'}});
+    for(var i=0;i<FLOWERS.length;i++){
+      (function(fl){
+        var b=btn({css:{width:'calc(25% - 9px)',padding:'12px 8px 14px',borderRadius:'18px',border:'2px solid '+(WIZARD.flower===fl.id?fl.col:'#F0E4DA'),background:WIZARD.flower===fl.id?fl.col+'22':'#fff',textAlign:'center',transition:'all .12s'},click:function(){WIZARD.flower=fl.id;renderWizard();}});
+        b.appendChild(div({css:{display:'flex',justifyContent:'center'}},[ flSVG(fl.id,48) ]));
+        b.appendChild(div({css:{fontSize:'11px',fontWeight:'700',color:'#3B1F0F',marginTop:'4px',lineHeight:'1.2'},txt:fl.name}));
+        fg.appendChild(b);
+      })(FLOWERS[i]);
+    }
+    wc.appendChild(fg);
+  }
+  if(WIZARD.step===6){
+    var summary=div({css:{background:'linear-gradient(135deg,#FFF0F6,#EEF2FF)',border:'2px solid '+WIZARD.color,borderRadius:'20px',padding:'24px',marginBottom:'24px',textAlign:'center'}});
+    summary.appendChild(div({css:{fontSize:'52px',marginBottom:'10px'},txt:WIZARD.emoji}));
+    summary.appendChild(div({css:{fontSize:'22px',fontWeight:'800',color:'#2D1810'},txt:WIZARD.name||'Friend'}));
+    summary.appendChild(div({css:{fontSize:'14px',color:'#9CA3AF',marginTop:'4px'},txt:'📍 '+(WIZARD.city||'Somewhere lovely')+' · 🌐 '+(WIZARD.tz||MY_TZ)}));
+    var fl=flById(WIZARD.flower);
+    summary.appendChild(div({css:{marginTop:'10px',fontSize:'13px',color:'#9CA3AF'},txt:'Favourite flower: '+fl.name+'  |  Theme: '+WIZARD.color}));
+    wc.appendChild(summary);
+  }
+
+  var btnRow=div({css:{display:'flex',gap:'12px',marginTop:'28px',justifyContent:'flex-end'}});
+  if(WIZARD.step>1){
+    btnRow.appendChild(btn({cls:'btn-outline',txt:'← Back',click:function(){WIZARD.step--;renderWizard();}}));
+  }
+  if(WIZARD.step<WIZARD_STEPS){
+    var nextLabel=WIZARD.step===1?'Continue →':'Next →';
+    btnRow.appendChild(btn({cls:'btn-pink',txt:nextLabel,click:function(){
+      if(WIZARD.step===1&&!WIZARD.name.trim()){alert('Please enter your name!');return;}
+      WIZARD.step++;renderWizard();
+    }}));
+  } else {
+    btnRow.appendChild(btn({cls:'btn-pink',txt:'🚀 Launch RingMe!',click:function(){
+      var p={name:WIZARD.name||'You',city:WIZARD.city||'My City',tz:WIZARD.tz||MY_TZ,emoji:WIZARD.emoji,flower:WIZARD.flower,color:WIZARD.color};
+      saveProfile(p);applyProfile(p);
+      MY_TZ=WIZARD.tz||MY_TZ;
+      startApp();
+    }}));
+  }
+  wc.appendChild(btnRow);
+  ss.appendChild(wc);
+}
+
+// ════════════════════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════════════════════
+function qs(id){return document.getElementById(id);}
+function flById(id){for(var i=0;i<FLOWERS.length;i++)if(FLOWERS[i].id===id)return FLOWERS[i];return FLOWERS[0];}
+function frById(id){for(var i=0;i<S.friends.length;i++)if(S.friends[i].id===id)return S.friends[i];return null;}
+function has(arr,val){for(var i=0;i<arr.length;i++)if(arr[i]===val)return true;return false;}
+function mk(tag,props,kids){
+  var e=document.createElement(tag);
+  if(props){for(var k in props){
+    if(k==='css'){for(var p in props.css)e.style[p]=props.css[p];}
+    else if(k==='cls'){e.className=props.cls;}
+    else if(k==='html'){e.innerHTML=props.html;}
+    else if(k==='txt'){e.textContent=props.txt;}
+    else if(k==='click'){(function(fn){e.addEventListener('click',fn);})(props.click);}
+    else if(k==='input'){e.addEventListener('input',props.input);}
+    else if(k==='change'){e.addEventListener('change',props.change);e.addEventListener('input',props.change);}
+    else{try{e.setAttribute(k,props[k]);}catch(ex){}}
+  }}
+  if(kids){for(var j=0;j<kids.length;j++){var c=kids[j];if(c==null||c===false||c===undefined)continue;if(typeof c==='string'||typeof c==='number')c=document.createTextNode(String(c));e.appendChild(c);}}
+  return e;
+}
+function div(p,k){return mk('div',p,k);}
+function span(p,k){return mk('span',p,k);}
+function btn(p,k){return mk('button',p,k);}
+function inp(p){return mk('input',p);}
+
+// ── Time helpers ─────────────────────────────────────────────
+function tzOff(tz){
+  try{
+    var n=new Date(),utc=n.toLocaleString('en-US',{timeZone:'UTC',hour:'numeric',minute:'2-digit',hour12:false}),loc=n.toLocaleString('en-US',{timeZone:tz,hour:'numeric',minute:'2-digit',hour12:false});
+    function p(s){var a=s.split(':');return parseInt(a[0]||0)+parseInt(a[1]||0)/60;}
+    var d=p(loc)-p(utc);if(d>14)d-=24;if(d<-12)d+=24;return d;
+  }catch(e){return 0;}
+}
+function getOverlap(tzs){
+  var offs=[];for(var i=0;i<tzs.length;i++)offs.push(tzOff(tzs[i]));
+  var result=[];
+  for(var h=0;h<24;h++){
+    var ok=true;
+    for(var j=0;j<offs.length;j++){var l=((h+offs[j])%24+24)%24;if(l<9||l>=22){ok=false;break;}}
+    if(ok)result.push({utcH:h,localH:((h+offs[0])%24+24)%24});
+  }
+  return result;
+}
+function pick3(slots){
+  if(!slots.length)return[];
+  var f=slots[0],m=slots[Math.floor(slots.length/2)],l=slots[slots.length-1];
+  var seen={},out=[];
+  var items=[{slot:f,lbl:'Early'},{slot:m,lbl:'Middle'},{slot:l,lbl:'Late'}];
+  for(var i=0;i<items.length;i++){if(!seen[items[i].slot.utcH]){seen[items[i].slot.utcH]=true;out.push({utcH:items[i].slot.utcH,localH:items[i].slot.localH,label:items[i].lbl});}}
+  return out;
+}
+function toLocal(utcH,tz){return((utcH+tzOff(tz))%24+24)%24;}
+function fmtH(h){var n=((h%24)+24)%24;if(n===0)return'12 AM';if(n<12)return n+' AM';if(n===12)return'12 PM';return(n-12)+' PM';}
+function tzTime(tz){try{return new Date().toLocaleString('en-US',{timeZone:tz,hour:'2-digit',minute:'2-digit',hour12:true});}catch(e){return'--:--';}}
+function tzHour(tz){try{var r=new Date().toLocaleString('en-US',{timeZone:tz,hour:'numeric',hour12:false});var h=parseInt(r);return h===24?0:h;}catch(e){return 12;}}
+function getStatus(tz){var h=tzHour(tz);if(h>=6&&h<12)return{i:'🌅',l:'Morning',ok:true};if(h>=12&&h<17)return{i:'☀️',l:'Afternoon',ok:true};if(h>=17&&h<22)return{i:'🌇',l:'Evening',ok:true};return{i:'🌙',l:'Sleeping',ok:false};}
+var CMETA=[{e:'🌅',g:'linear-gradient(135deg,#FFF7ED,#FEF3C7)',b:'#F59E0B',s:'#FDE68A'},{e:'☀️',g:'linear-gradient(135deg,#ECFDF5,#F0FDF4)',b:'#22C55E',s:'#86EFAC'},{e:'🌇',g:'linear-gradient(135deg,#EFF6FF,#F0F9FF)',b:'#3B82F6',s:'#BAE6FD'}];
+
+function tickClock(){
+  var el=qs('clock-badge');
+  if(el)el.textContent=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+
+// ── SVG Flowers ──────────────────────────────────────────────
+function flSVG(id,size){
+  var s=size||60;
+  var svgs={
+    rose:'<ellipse cx="40" cy="36" rx="18" ry="16" fill="#FBCFE8" fill-opacity=".7"/><ellipse cx="30" cy="30" rx="13" ry="11" fill="#F9A8D4" fill-opacity=".8" transform="rotate(-15 30 30)"/><ellipse cx="50" cy="28" rx="13" ry="11" fill="#F472B6" fill-opacity=".6" transform="rotate(15 50 28)"/><ellipse cx="40" cy="22" rx="11" ry="9" fill="#EC4899" fill-opacity=".7"/><line x1="40" y1="52" x2="38" y2="68" stroke="#6DAF6D" stroke-width="2.5" stroke-linecap="round"/>',
+    daisy:'<circle cx="40" cy="36" r="11" fill="#FCD34D"/><circle cx="40" cy="36" r="7" fill="#F59E0B" fill-opacity=".7"/><line x1="40" y1="49" x2="38" y2="66" stroke="#4ADE80" stroke-width="2.5" stroke-linecap="round"/><line x1="40" y1="8" x2="40" y2="24" stroke="#FEF9C3" stroke-width="8" stroke-linecap="round"/><line x1="56" y1="14" x2="47" y2="27" stroke="#FEF9C3" stroke-width="7" stroke-linecap="round"/><line x1="64" y1="30" x2="51" y2="34" stroke="#FEF9C3" stroke-width="7" stroke-linecap="round"/><line x1="56" y1="58" x2="47" y2="45" stroke="#FEF9C3" stroke-width="7" stroke-linecap="round"/><line x1="24" y1="14" x2="33" y2="27" stroke="#FEF9C3" stroke-width="7" stroke-linecap="round"/><line x1="16" y1="30" x2="29" y2="34" stroke="#FEF9C3" stroke-width="7" stroke-linecap="round"/>',
+    tulip:'<path d="M33 58 Q30 38 50 26 Q70 38 67 58 Q60 74 50 76 Q40 74 33 58Z" fill="#FECACA" fill-opacity=".6"/><path d="M36 56 Q34 40 50 30 L50 76 Q40 74 36 56Z" fill="#F87171" fill-opacity=".7"/><path d="M64 56 Q66 40 50 30 L50 76 Q60 74 64 56Z" fill="#EF4444" fill-opacity=".55"/><line x1="50" y1="76" x2="48" y2="72" stroke="#4ADE80" stroke-width="3" stroke-linecap="round"/>',
+    lavender:'<line x1="40" y1="72" x2="40" y2="10" stroke="#7DC87D" stroke-width="2.5" stroke-linecap="round"/><ellipse cx="36" cy="12" rx="5" ry="4.5" fill="#DDD6FE" transform="rotate(-15 36 12)"/><ellipse cx="44" cy="15" rx="5" ry="4.5" fill="#C4B5FD" transform="rotate(15 44 15)"/><ellipse cx="36" cy="22" rx="5" ry="4.5" fill="#A78BFA" transform="rotate(-15 36 22)"/><ellipse cx="44" cy="25" rx="5" ry="4.5" fill="#DDD6FE" transform="rotate(15 44 25)"/><ellipse cx="36" cy="32" rx="5" ry="4.5" fill="#C4B5FD" transform="rotate(-15 36 32)"/><ellipse cx="44" cy="35" rx="5" ry="4.5" fill="#A78BFA" transform="rotate(15 44 35)"/><ellipse cx="36" cy="42" rx="5" ry="4.5" fill="#DDD6FE" transform="rotate(-15 36 42)"/><ellipse cx="44" cy="45" rx="5" ry="4.5" fill="#C4B5FD" transform="rotate(15 44 45)"/>',
+    sunflower:'<circle cx="40" cy="36" r="13" fill="#92400E" fill-opacity=".88"/><circle cx="40" cy="36" r="9" fill="#78350F" fill-opacity=".75"/><line x1="40" y1="49" x2="38" y2="68" stroke="#22C55E" stroke-width="3" stroke-linecap="round"/><line x1="40" y1="8" x2="40" y2="22" stroke="#FCD34D" stroke-width="9" stroke-linecap="round"/><line x1="58" y1="14" x2="50" y2="26" stroke="#FDE68A" stroke-width="8" stroke-linecap="round"/><line x1="68" y1="30" x2="54" y2="34" stroke="#FCD34D" stroke-width="8" stroke-linecap="round"/><line x1="22" y1="14" x2="30" y2="26" stroke="#FDE68A" stroke-width="8" stroke-linecap="round"/><line x1="12" y1="30" x2="26" y2="34" stroke="#FCD34D" stroke-width="8" stroke-linecap="round"/><line x1="22" y1="58" x2="30" y2="46" stroke="#FDE68A" stroke-width="8" stroke-linecap="round"/><line x1="58" y1="58" x2="50" y2="46" stroke="#FCD34D" stroke-width="8" stroke-linecap="round"/>',
+    cherry:'<circle cx="40" cy="34" r="9" fill="#F9A8D4" fill-opacity=".75"/><circle cx="40" cy="34" r="5" fill="#EC4899" fill-opacity=".55"/><line x1="40" y1="54" x2="38" y2="68" stroke="#8BAF6D" stroke-width="2.5" stroke-linecap="round"/><ellipse cx="40" cy="34" rx="26" ry="24" fill="#FBCFE8" fill-opacity=".35"/>',
+    hibiscus:'<circle cx="40" cy="34" r="26" fill="#FECDD3" fill-opacity=".5"/><circle cx="40" cy="34" r="9" fill="#E11D48" fill-opacity=".65"/><line x1="40" y1="54" x2="38" y2="68" stroke="#6DAF6D" stroke-width="2.5" stroke-linecap="round"/>',
+    aster:'<ellipse cx="40" cy="34" rx="26" ry="24" fill="#DDD6FE" fill-opacity=".4"/><circle cx="40" cy="34" r="11" fill="#FCD34D" fill-opacity=".85"/><circle cx="40" cy="34" r="7" fill="#F59E0B" fill-opacity=".7"/><line x1="40" y1="45" x2="38" y2="68" stroke="#6DAF6D" stroke-width="2.5" stroke-linecap="round"/>'
+  };
+  var inner=svgs[id]||svgs.daisy;
+  var w=div({css:{display:'flex',alignItems:'center',justifyContent:'center'}});
+  w.innerHTML='<svg width="'+s+'" height="'+s+'" viewBox="0 0 80 80" fill="none">'+inner+'</svg>';
+  return w;
+}
+
+// ── Rotary Dial ──────────────────────────────────────────────
+var DIAL_POS=[{d:'1',a:-60},{d:'2',a:-30},{d:'3',a:0},{d:'4',a:30},{d:'5',a:60},{d:'6',a:90},{d:'7',a:120},{d:'8',a:150},{d:'9',a:180},{d:'0',a:210}];
+function makeDial(onDigit){
+  var spinning=false;
+  var wrap=div({cls:'dial-wrap'});
+  wrap.innerHTML='<div class="dial-body"></div>';
+  var disc=div({cls:'dial-disc'});
+  var ctr=div({cls:'dial-ctr'});
+  ctr.innerHTML='<div style="font-size:9px;color:#C85A6E;font-weight:700;letter-spacing:1px">RING</div><div style="font-size:12px;font-weight:800;color:#3B1F0F">ME!</div>';
+  var stop=div({cls:'dial-stop'});
+  for(var i=0;i<DIAL_POS.length;i++){
+    (function(dp){
+      var rad=((dp.a-90)*Math.PI)/180,r=33;
+      var cx=50+r*Math.cos(rad),cy=50+r*Math.sin(rad);
+      var hole=div({cls:'dial-hole',txt:dp.d});
+      hole.style.left='calc('+cx.toFixed(2)+'% - 20px)';
+      hole.style.top='calc('+cy.toFixed(2)+'% - 20px)';
+      hole.addEventListener('click',function(){
+        if(spinning)return;spinning=true;
+        var frame=0,total=22,target=dp.a+60;
+        function go(){frame++;var rot=frame<=total/2?target*(frame/(total/2)):target*(1-(frame-total/2)/(total/2));disc.style.transform='rotate('+rot+'deg)';if(frame<total)requestAnimationFrame(go);else{disc.style.transform='';spinning=false;onDigit(dp.d);}}
+        requestAnimationFrame(go);
+      });
+      disc.appendChild(hole);
+    })(DIAL_POS[i]);
+  }
+  disc.appendChild(ctr);
+  wrap.appendChild(disc);
+  wrap.appendChild(stop);
+  return wrap;
+}
+
+// ════════════════════════════════════════════════════════════
+//  RENDER
+// ════════════════════════════════════════════════════════════
+function render(){
+  var m=qs('main');
+  m.innerHTML='';
+  var screens={time:timeScreen,flowers:flowersScreen,board:boardScreen,prompts:promptsScreen,settings:settingsScreen};
+  m.appendChild((screens[S.tab]||timeScreen)());
+  buildNav();
+}
+
+function buildNav(){
+  var nav=qs('topnav');
+  nav.innerHTML='';
+  var unread=0;for(var i=0;i<S.inbox.length;i++)if(!S.inbox[i].read)unread++;
+  var tabs=[{id:'time',icon:'🕐',lbl:'Time Zone'},{id:'flowers',icon:'💐',lbl:'Flowers',badge:unread},{id:'board',icon:'📌',lbl:'The Board'},{id:'prompts',icon:'✍️',lbl:'Prompts'},{id:'settings',icon:'⚙️',lbl:'Setup'}];
+  for(var i=0;i<tabs.length;i++){
+    (function(t){
+      var b=btn({cls:'ntab'+(S.tab===t.id?' on':''),click:function(){S.tab=t.id;render();}});
+      b.appendChild(span({cls:'nicon',txt:t.icon}));
+      b.appendChild(span({txt:t.lbl}));
+      if(t.badge>0)b.appendChild(div({cls:'nbadge',txt:t.badge}));
+      nav.appendChild(b);
+    })(tabs[i]);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  TIME SCREEN
+// ════════════════════════════════════════════════════════════
+function timeScreen(){
+  var sc=div();
+  var tzList=[MY_TZ];for(var i=0;i<S.friends.length;i++)tzList.push(S.friends[i].tz);
+  var slots=getOverlap(tzList),three=pick3(slots);
+
+  // Page header
+  sc.appendChild(div({css:{marginBottom:'24px'}},[ div({cls:'ey',txt:'RingMe! · Time Zone'}), div({cls:'pt',txt:'When can you call? 🕊️'}) ]));
+
+  // Overlap info bar
+  if(slots.length){
+    var bar=div({css:{display:'flex',alignItems:'center',gap:'12px',marginBottom:'22px',background:'#FFFBEB',border:'1.5px solid #FCD34D',borderRadius:'30px',padding:'10px 20px',fontSize:'14px',color:'#92400E',fontWeight:'700',width:'fit-content'}});
+    bar.innerHTML='🕰️ &nbsp;<strong>'+slots.length+' hour'+( slots.length>1?'s':'')+' of overlap</strong> &nbsp;·&nbsp; '+fmtH(slots[0].localH)+' → '+fmtH(slots[slots.length-1].localH)+' &nbsp;<span style="font-size:12px;color:#B45309">(your local time)</span>';
+    sc.appendChild(bar);
+  }
+
+  var mainGrid=div({cls:'panel-grid pg-3-2',css:{marginBottom:'28px'}});
+
+  // Golden windows (left)
+  var leftCol=div({css:{display:'flex',flexDirection:'column',gap:'16px'}});
+  leftCol.appendChild(div({cls:'sl',txt:'✨ Golden Windows — Best times to call'}));
+  if(!slots.length){
+    leftCol.appendChild(div({css:{background:'#FEE2E2',borderRadius:'20px',padding:'32px',textAlign:'center',border:'1.5px solid #FCA5A5'}},[ div({css:{fontSize:'40px',marginBottom:'10px'},txt:'😅'}), div({css:{fontSize:'18px',color:'#DC2626',fontWeight:'800'},txt:'No overlap found!'}) ]));
+  } else {
+    for(var si=0;si<three.length;si++){
+      (function(slot,idx){
+        var meta=CMETA[idx]||CMETA[0];
+        var slotKey='s'+slot.utcH;
+        if(!S.slots[slotKey])S.slots[slotKey]={};
+        var meIn=S.slots[slotKey][0];
+        var card=div({css:{background:meta.g,borderRadius:'22px',border:'2px solid '+meta.b,boxShadow:'0 4px 0 '+meta.s,padding:'20px 24px'}});
+        card.appendChild(div({css:{fontSize:'11px',letterSpacing:'2px',fontWeight:'700',textTransform:'uppercase',color:meta.b,marginBottom:'8px'},txt:meta.e+' '+slot.label+' of overlap'}));
+        card.appendChild(div({css:{fontSize:'44px',fontWeight:'800',color:'#3B1F0F',letterSpacing:'-2px',lineHeight:'1'},txt:fmtH(slot.localH)}));
+        card.appendChild(div({css:{fontSize:'12px',color:'#78716C',marginTop:'2px',marginBottom:'14px'},txt:'your local time'}));
+        var timesBox=div({css:{background:'rgba(255,255,255,.65)',borderRadius:'14px',padding:'12px 14px',marginBottom:'14px'}});
+        var allPpl=[{id:0,name:'You',emoji:S.me.emoji,tz:MY_TZ}];for(var fi=0;fi<S.friends.length;fi++)allPpl.push(S.friends[fi]);
+        for(var pi=0;pi<allPpl.length;pi++){
+          (function(person){
+            var inSlot=S.slots[slotKey]&&S.slots[slotKey][person.id];
+            var row=div({css:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'4px'}});
+            row.appendChild(span({css:{fontWeight:'700',color:'#3B1F0F',fontSize:'14px'},txt:person.emoji+' '+person.name}));
+            var right=div({css:{display:'flex',alignItems:'center',gap:'8px'}});
+            right.appendChild(span({css:{fontWeight:'800',color:'#3B1F0F',fontSize:'14px'},txt:fmtH(toLocal(slot.utcH,person.tz))}));
+            if(person.id!==0){
+              right.appendChild(btn({css:{fontSize:'11px',padding:'3px 10px',borderRadius:'20px',border:'1.5px solid '+(inSlot?meta.b:'#D1D5DB'),background:inSlot?meta.b:'#fff',color:inSlot?'#fff':'#9CA3AF',fontWeight:'700'},txt:inSlot?'✓ In!':'+ Join',click:function(){
+                if(!S.slots[slotKey])S.slots[slotKey]={};
+                S.slots[slotKey][person.id]=!S.slots[slotKey][person.id];render();
+              }}));
+            }
+            row.appendChild(right);timesBox.appendChild(row);
+          })(allPpl[pi]);
+        }
+        card.appendChild(timesBox);
+        var btns=div({css:{display:'flex',gap:'10px'}});
+        btns.appendChild(btn({css:{flex:'1',background:meIn?meta.b:'#fff',color:meIn?'#fff':meta.b,border:'2px solid '+meta.b,borderRadius:'30px',padding:'11px 0',fontSize:'14px',fontWeight:'800',boxShadow:meIn?'none':'0 3px 0 '+meta.s},txt:meIn?'✓ You\'re in!':'📅 Schedule this',click:function(){
+          if(!S.slots[slotKey])S.slots[slotKey]={};
+          S.slots[slotKey][0]=!S.slots[slotKey][0];
+          var count=0;for(var k in S.slots)if(S.slots[k][0])count++;
+          if(count>=3)S.badges.campfire=true;render();
+        }}));
+        btns.appendChild(btn({css:{background:'#fff',border:'2px solid '+meta.b,borderRadius:'30px',padding:'11px 16px',fontSize:'18px',boxShadow:'0 3px 0 '+meta.s},txt:'📞',click:function(){
+          var code=String(Math.floor(100+Math.random()*900));
+          var cf=[{id:0,name:'You',emoji:S.me.emoji,color:S.me.color,soft:'#EEF2FF'}];
+          for(var fi=0;fi<S.friends.length;fi++)if(S.slots[slotKey]&&S.slots[slotKey][S.friends[fi].id])cf.push(S.friends[fi]);
+          if(cf.length<2){cf=[{id:0,name:'You',emoji:S.me.emoji,color:S.me.color,soft:'#EEF2FF'}];for(var fi=0;fi<S.friends.length;fi++)cf.push(S.friends[fi]);}
+          S.callCode=code;S.callFriends=cf;S.callActive=true;S.callSuccess=false;S.callDialed=[];render();
+        }}));
+        card.appendChild(btns);leftCol.appendChild(card);
+      })(three[si],si);
+    }
+  }
+  mainGrid.appendChild(leftCol);
+
+  // Circle (right)
+  var rightCol=div({css:{display:'flex',flexDirection:'column',gap:'12px'}});
+  rightCol.appendChild(div({cls:'sl',txt:'Your Circle — Live times'}));
+  var circle=[{id:0,name:'You',emoji:S.me.emoji,city:S.me.city,tz:MY_TZ,color:S.me.color}];
+  for(var fi=0;fi<S.friends.length;fi++)circle.push(S.friends[fi]);
+  for(var ci=0;ci<circle.length;ci++){
+    (function(f){
+      var st=getStatus(f.tz);
+      var c=div({css:{background:st.ok?'#fff':'#F7F3EF',border:'1.5px solid '+f.color,borderRadius:'18px',padding:'14px 18px',display:'flex',alignItems:'center',gap:'14px',position:'relative',overflow:'hidden'}});
+      c.appendChild(div({css:{fontSize:'28px',flexShrink:'0'},txt:f.emoji}));
+      var info=div({css:{flex:'1'}});
+      info.appendChild(div({css:{fontSize:'15px',fontWeight:'800',color:'#3B1F0F'},txt:f.name}));
+      info.appendChild(div({css:{fontSize:'12px',color:'#9CA3AF'},txt:f.city}));
+      c.appendChild(info);
+      var timeBlock=div({css:{textAlign:'right'}});
+      timeBlock.appendChild(div({css:{fontSize:'22px',fontWeight:'800',color:st.ok?'#3B1F0F':'#9CA3AF'},txt:tzTime(f.tz)}));
+      timeBlock.appendChild(div({css:{fontSize:'11px',fontWeight:'600',color:st.ok?'#22C55E':'#F87171'},txt:st.i+' '+st.l}));
+      c.appendChild(timeBlock);
+      rightCol.appendChild(c);
+    })(circle[ci]);
+  }
+  mainGrid.appendChild(rightCol);
+  sc.appendChild(mainGrid);
+  if(S.callActive)sc.appendChild(callOverlay());
+  return sc;
+}
+
+// ── Call Overlay ─────────────────────────────────────────────
+function callOverlay(){
+  var ov=div({cls:'ovl',css:{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'flex-start',paddingTop:'60px',paddingBottom:'40px'}});
+  if(!S.callSuccess){
+    var xBtn=btn({css:{position:'fixed',top:'24px',right:'24px',fontSize:'22px',color:'#9CA3AF',width:'40px',height:'40px',borderRadius:'50%',background:'rgba(255,255,255,.9)',border:'1.5px solid #F0E4DA',display:'flex',alignItems:'center',justifyContent:'center'},txt:'✕',click:function(){S.callActive=false;render();}});
+    ov.appendChild(xBtn);
+    ov.appendChild(div({css:{textAlign:'center',marginBottom:'20px'}},[ div({css:{fontSize:'13px',letterSpacing:'3px',color:'#C084FC',textTransform:'uppercase',marginBottom:'8px',fontWeight:'700'},txt:'Incoming Call ✨'}), div({css:{fontSize:'72px',display:'inline-block',animation:'ringBounce .4s ease infinite alternate'},txt:'📞'}), div({css:{fontSize:'24px',fontWeight:'800',color:'#3B1F0F',marginTop:'6px'},txt:'Your friends are calling!'}) ]));
+    var frow=div({css:{display:'flex',justifyContent:'center',gap:'10px',marginBottom:'16px',flexWrap:'wrap'}});
+    for(var i=0;i<S.callFriends.length;i++){
+      var f=S.callFriends[i];
+      frow.appendChild(div({css:{background:f.soft||'#FFF0F6',border:'2px solid '+(f.color||'#F9A8D4'),borderRadius:'30px',padding:'5px 14px',fontSize:'14px',fontWeight:'700'},txt:f.emoji+' '+f.name}));
+    }
+    ov.appendChild(frow);
+    ov.appendChild(div({css:{fontSize:'14px',color:'#9CA3AF',marginBottom:'16px',textAlign:'center'},txt:'Spin the dial to enter the secret code!'}));
+    var boxWrap=div({css:{display:'flex',gap:'16px',marginBottom:'8px',justifyContent:'center'}});
+    var boxes=[];
+    for(var i=0;i<3;i++){
+      var b=div({css:{width:'72px',height:'82px',borderRadius:'18px',background:'#fff',border:'3px solid #E5D5C8',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'34px',fontWeight:'800',color:'#3B1F0F',transition:'all .2s'}});
+      boxes.push(b);boxWrap.appendChild(b);
+    }
+    function updateBoxes(){for(var i=0;i<3;i++){boxes[i].textContent=S.callDialed[i]||'';boxes[i].style.background=S.callDialed[i]?'#FFF0F6':'#fff';boxes[i].style.border='3px solid '+(S.callDialed[i]?'#F9A8D4':'#E5D5C8');}}
+    ov.appendChild(boxWrap);
+    ov.appendChild(div({css:{fontSize:'14px',color:'#9CA3AF',marginBottom:'16px',textAlign:'center'},html:'Hint: <strong style="color:#EC4899">'+S.callCode+'</strong>'}));
+    var dialWrap=div({css:{display:'flex',justifyContent:'center',width:'100%'}});
+    dialWrap.appendChild(makeDial(function(d){
+      S.callDialed=S.callDialed.concat([d]).slice(-3);updateBoxes();
+      if(S.callDialed.length===3){
+        if(S.callDialed.join('')===S.callCode){S.callSuccess=true;render();}
+        else{boxWrap.style.animation='wiggle .4s';setTimeout(function(){boxWrap.style.animation='';S.callDialed=[];updateBoxes();},500);}
+      }
+    }));
+    ov.appendChild(dialWrap);
+    ov.appendChild(div({css:{marginTop:'14px',fontSize:'13px',color:'#9CA3AF',textAlign:'center'},txt:'☝️ Click a number to spin the dial'}));
+  } else {
+    var win=div({css:{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'60px 28px 40px',textAlign:'center',width:'100%',animation:'fadeIn .4s ease'}});
+    win.appendChild(div({css:{width:'110px',height:'110px',borderRadius:'50%',background:'linear-gradient(135deg,#BBF7D0,#86EFAC)',border:'4px solid #22C55E',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'52px',marginBottom:'22px',boxShadow:'0 0 0 10px #DCFCE7',animation:'petalPop .6s ease forwards'},txt:'✓'}));
+    win.appendChild(div({css:{fontSize:'34px',fontFamily:"'Fredoka One',cursive",color:'#22C55E',marginBottom:'8px'},txt:'Connected!'}));
+    var fnames='';for(var i=0;i<S.callFriends.length;i++)fnames+=S.callFriends[i].emoji+' '+S.callFriends[i].name+(i<S.callFriends.length-1?', ':'');
+    win.appendChild(div({css:{fontSize:'16px',fontWeight:'700',color:'#3B1F0F',marginBottom:'4px'},txt:fnames}));
+    win.appendChild(div({css:{fontSize:'14px',color:'#9CA3AF',marginBottom:'32px'},txt:'are waiting on Google Meet'}));
+    var meetBtn=mk('a',{href:S.meetLink||'https://meet.google.com/new',target:'_blank',css:{display:'flex',alignItems:'center',justifyContent:'center',gap:'14px',background:'linear-gradient(135deg,#1A73E8,#1967D2)',borderRadius:'36px',padding:'22px 48px',boxShadow:'0 8px 0 #1558B0',marginBottom:'20px',animation:'pulseMeet 2s ease infinite'}},
+      [span({css:{fontSize:'28px'},txt:'📹'}),span({css:{fontSize:'20px',fontWeight:'800',color:'#fff'},txt:'Join Google Meet'})]);
+    win.appendChild(meetBtn);
+    win.appendChild(btn({css:{fontSize:'14px',color:'#D1D5DB'},txt:'Close',click:function(){S.callActive=false;render();}}));
+    ov.appendChild(win);
+  }
+  return ov;
+}
+
+// ════════════════════════════════════════════════════════════
+//  FLOWERS SCREEN
+// ════════════════════════════════════════════════════════════
+function flowersScreen(){
+  var sc=div();
+  var unread=0;for(var i=0;i<S.inbox.length;i++)if(!S.inbox[i].read)unread++;
+  sc.appendChild(div({css:{marginBottom:'20px'}},[ div({cls:'ey',txt:'RingMe! · Flowers'}), div({cls:'pt',txt:'Daily Flowers 💐'}) ]));
+  var tabRow=div({css:{display:'flex',gap:'8px',marginBottom:'24px',maxWidth:'480px'}});
+  var tabs=[{id:'send',l:'Send a Flower 🌸'},{id:'inbox',l:unread?'Inbox ('+unread+')':'Inbox 📬'},{id:'garden',l:'My Garden 🌿'}];
+  for(var i=0;i<tabs.length;i++)(function(t){tabRow.appendChild(btn({cls:'tab-btn'+(S.ftab===t.id?' on':''),txt:t.l,click:function(){S.ftab=t.id;render();}}));})(tabs[i]);
+  sc.appendChild(tabRow);
+  var body=div();
+  if(S.ftab==='send')renderSendTab(body);
+  if(S.ftab==='inbox')renderInboxTab(body,sc);
+  if(S.ftab==='garden')renderGardenTab(body);
+  sc.appendChild(body);
+  return sc;
+}
+
+function renderSendTab(body){
+  if(!S.fSent){
+    var grid=div({cls:'panel-grid pg-2',css:{maxWidth:'900px'}});
+    var left=div({css:{display:'flex',flexDirection:'column',gap:'18px'}});
+    left.appendChild(div({cls:'sl',txt:'Step 1 — Choose a friend'}));
+    var frow=div({css:{display:'flex',gap:'12px',flexWrap:'wrap'}});
+    for(var i=0;i<S.friends.length;i++){
+      (function(f){
+        var b=btn({css:{flex:'1',minWidth:'120px',padding:'14px 10px',borderRadius:'18px',border:'2px solid '+(S.fSendFriend===f.id?f.color:'#F0E4DA'),background:S.fSendFriend===f.id?f.soft:'#fff',boxShadow:S.fSendFriend===f.id?'0 3px 0 '+f.color:'none',transition:'all .15s',textAlign:'center'},click:function(){S.fSendFriend=f.id;S.fSendFlower='';render();}});
+        b.appendChild(div({css:{fontSize:'30px'},txt:f.emoji}));
+        b.appendChild(div({css:{fontSize:'14px',fontWeight:'800',color:'#3B1F0F',marginTop:'6px'},txt:f.name}));
+        b.appendChild(div({css:{fontSize:'11px',color:'#9CA3AF'},txt:f.city}));
+        frow.appendChild(b);
+      })(S.friends[i]);
+    }
+    left.appendChild(frow);
+    if(S.fSendFriend){
+      var selF=frById(S.fSendFriend),fave=flById(selF.flower);
+      left.appendChild(div({cls:'sl',css:{marginTop:'8px'},txt:'Step 2 — Pick a flower'}));
+      left.appendChild(div({css:{fontSize:'13px',color:'#EC4899',fontWeight:'700',marginBottom:'10px'},txt:'💕 '+selF.name+' loves '+fave.name+'s!'}));
+      var ordered=[fave];for(var i=0;i<FLOWERS.length;i++)if(FLOWERS[i].id!==fave.id)ordered.push(FLOWERS[i]);
+      var flGrid=div({css:{display:'flex',flexWrap:'wrap',gap:'10px'}});
+      for(var i=0;i<ordered.length;i++){
+        (function(flower,idx){
+          var b=btn({css:{width:'calc(25% - 8px)',padding:'10px 6px 12px',borderRadius:'18px',border:'2px solid '+(S.fSendFlower===flower.id?flower.col:'#F0E4DA'),background:S.fSendFlower===flower.id?flower.col+'22':'#fff',position:'relative',textAlign:'center'},click:function(){S.fSendFlower=flower.id;render();}});
+          b.appendChild(div({css:{display:'flex',justifyContent:'center'}},[flSVG(flower.id,52)]));
+          b.appendChild(div({css:{fontSize:'11px',fontWeight:'700',color:'#3B1F0F',lineHeight:'1.2'},txt:flower.name}));
+          if(idx===0)b.appendChild(div({css:{position:'absolute',top:'-8px',right:'-6px',background:'#EC4899',color:'#fff',fontSize:'9px',fontWeight:'800',borderRadius:'12px',padding:'2px 8px'},txt:'FAV'}));
+          flGrid.appendChild(b);
+        })(ordered[i],i);
+      }
+      left.appendChild(flGrid);
+    }
+    grid.appendChild(left);
+    var right=div({css:{display:'flex',flexDirection:'column',gap:'16px'}});
+    if(S.fSendFlower){
+      var f=frById(S.fSendFriend);
+      right.appendChild(div({cls:'sl',txt:'Step 3 — Write a note'}));
+      var noteBox=div({css:{background:'#fff',borderRadius:'16px',border:'1.5px solid #F9A8D4',overflow:'hidden'}});
+      noteBox.appendChild(div({css:{padding:'10px 16px 0',fontSize:'12px',color:'#C084FC',fontWeight:'700'},txt:'To '+(f?f.name:'friend')+' 💌'}));
+      var ta=mk('textarea',{css:{padding:'8px 16px 14px',fontSize:'20px',color:'#3B1F0F',height:'90px',display:'block',width:'100%'},placeholder:'Write something sweet...',input:function(e){S.fNote=e.target.value;}});
+      ta.value=S.fNote||'';noteBox.appendChild(ta);right.appendChild(noteBox);
+      var qbtns=['Thinking of you! 🌸','Miss you so much!','You brighten my day ✨','Sending love 💕'];
+      var qrow=div({css:{display:'flex',gap:'8px',flexWrap:'wrap'}});
+      for(var i=0;i<qbtns.length;i++)(function(s){qrow.appendChild(btn({css:{fontSize:'12px',padding:'6px 12px',borderRadius:'20px',border:'1.5px solid #F0E4DA',background:'#fff',color:'#9CA3AF',fontWeight:'600'},txt:s,click:function(){S.fNote=s;ta.value=s;}}));})(qbtns[i]);
+      right.appendChild(qrow);
+      var flName=flById(S.fSendFlower).name,fName=f?f.name:'friend';
+      right.appendChild(btn({cls:'btn-pink',css:{marginTop:'8px'},txt:'💐 Send '+flName+' to '+fName,click:function(){S.fSent=true;S.sendCount=Math.min((S.sendCount||1)+1,5);render();}}));
+    } else {
+      right.appendChild(div({css:{background:'#F9F5F2',borderRadius:'20px',padding:'32px',textAlign:'center',border:'1.5px dashed #F0E4DA'}},[ div({css:{fontSize:'36px',marginBottom:'10px'},txt:'🌸'}), div({css:{fontSize:'14px',color:'#9CA3AF'},txt:'Select a friend and flower\nto write your note'}) ]));
+    }
+    right.appendChild(streakGarden());
+    grid.appendChild(right);
+    body.appendChild(grid);
+  } else {
+    var sentFlower=flById(S.fSendFlower||'daisy'),sentFriend=frById(S.fSendFriend);
+    var wrap=div({css:{textAlign:'center',padding:'52px 16px',animation:'fadeIn .5s ease',maxWidth:'500px',margin:'0 auto'}});
+    wrap.appendChild(div({css:{display:'flex',justifyContent:'center',marginBottom:'12px',animation:'petalPop .9s ease forwards'}},[flSVG(S.fSendFlower||'daisy',140)]));
+    wrap.appendChild(div({css:{fontSize:'30px',fontWeight:'800',color:'#3B1F0F',marginTop:'6px'},txt:'Sent! 💌'}));
+    wrap.appendChild(div({css:{fontSize:'15px',color:'#9CA3AF',fontStyle:'italic',marginTop:'4px',marginBottom:'22px'},txt:(sentFriend?sentFriend.name:'Your friend')+' will receive a seed to bloom'}));
+    if(S.fNote)wrap.appendChild(div({css:{background:'#FFF0F6',border:'1.5px solid #F9A8D4',borderRadius:'16px',padding:'16px 20px',marginBottom:'24px',fontStyle:'italic',color:'#9D174D',fontSize:'15px'},txt:'"'+S.fNote+'"'}));
+    wrap.appendChild(div({css:{background:'#F0FDF4',border:'1.5px solid #86EFAC',borderRadius:'14px',padding:'10px 20px',marginBottom:'24px',fontSize:'14px',color:'#14532D',fontWeight:'700'},txt:'🌱 Flower #'+S.sendCount+' sent!'}));
+    wrap.appendChild(btn({cls:'btn-outline',txt:'Send another 🌸',click:function(){S.fSent=false;S.fSendFriend=0;S.fSendFlower='';S.fNote='';render();}}));
+    body.appendChild(wrap);
+  }
+}
+
+function renderInboxTab(body,sc){
+  body.appendChild(div({cls:'sl',txt:'Received Flowers'}));
+  var grid=div({css:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))',gap:'14px'}});
+  for(var i=0;i<S.inbox.length;i++){
+    (function(item){
+      var f=frById(item.fid)||S.friends[0],flower=flById(item.flower);
+      var row=div({css:{background:'#fff',borderRadius:'18px',padding:'16px 18px',border:'1.5px solid '+(item.read?'#F0E4DA':f.color),boxShadow:item.read?'none':'0 3px 0 '+f.color,display:'flex',alignItems:'center',gap:'14px',cursor:item.read?'default':'pointer',opacity:item.read?'0.6':'1'}});
+      if(!item.read)row.addEventListener('click',function(){S.seedModal=item;render();});
+      row.appendChild(div({css:{flexShrink:'0'}},[flSVG(flower.id,64)]));
+      var info=div({css:{flex:'1',minWidth:'0'}});
+      var irow=div({css:{display:'flex',alignItems:'center',gap:'6px',marginBottom:'3px'}});
+      irow.appendChild(span({css:{fontSize:'15px',fontWeight:'800',color:'#3B1F0F'},txt:f.emoji+' '+f.name}));
+      if(!item.read)irow.appendChild(span({css:{background:'#F9A8D4',color:'#9D174D',fontSize:'10px',fontWeight:'800',borderRadius:'10px',padding:'2px 8px'},txt:'NEW'}));
+      info.appendChild(irow);
+      info.appendChild(div({css:{fontSize:'13px',color:'#6B7280',fontStyle:'italic',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'},txt:'"'+item.note+'"'}));
+      info.appendChild(div({css:{fontSize:'11px',color:'#9CA3AF',marginTop:'3px'},txt:flower.name+' · '+item.time}));
+      row.appendChild(info);
+      row.appendChild(item.read?div({css:{fontSize:'16px',color:'#22C55E',fontWeight:'800'},txt:'✓'}):div({css:{fontSize:'22px'},txt:'🌱'}));
+      grid.appendChild(row);
+    })(S.inbox[i]);
+  }
+  body.appendChild(grid);
+  if(S.seedModal){
+    var item=S.seedModal,f=frById(item.fid)||S.friends[0],flower=flById(item.flower);
+    var mbg=div({cls:'mbg'});
+    mbg.addEventListener('click',function(){S.seedModal=null;render();});
+    var sh=div({cls:'msh'});sh.addEventListener('click',function(e){e.stopPropagation();});
+    sh.appendChild(div({css:{fontSize:'14px',letterSpacing:'2px',color:'#C084FC',fontWeight:'700',textTransform:'uppercase',marginBottom:'16px'},txt:'A flower seed arrived 🌱'}));
+    sh.appendChild(div({css:{fontSize:'18px',fontWeight:'800',color:'#2D1810',marginBottom:'24px'},txt:f.name+' sent you something sweet!'}));
+    var sw=div({css:{display:'flex',justifyContent:'center',marginBottom:'28px'}});
+    sw.innerHTML='<div style="animation:seedWig 1.4s ease infinite;display:inline-block"><svg width="80" height="80" viewBox="0 0 72 72" fill="none"><ellipse cx="36" cy="44" rx="18" ry="22" fill="#D97706" fill-opacity=".25"/><ellipse cx="36" cy="42" rx="14" ry="18" fill="#92400E" fill-opacity=".72"/><ellipse cx="36" cy="38" rx="10" ry="13" fill="#78350F" fill-opacity=".65"/></svg></div>';
+    sh.appendChild(sw);
+    sh.appendChild(btn({cls:'btn-pink',css:{width:'100%'},txt:'💌 Accept the flower!',click:function(){item.read=true;S.garden.unshift({id:Date.now(),flower:item.flower,from:f.name,date:'Today'});S.seedModal=null;render();}}));
+    mbg.appendChild(sh);sc.appendChild(mbg);
+  }
+}
+
+function renderGardenTab(body){
+  var grid=div({cls:'panel-grid pg-2',css:{maxWidth:'900px'}});
+  var left=div();
+  left.appendChild(div({cls:'sl',txt:'Your Secret Seed 🌱'}));
+  left.appendChild(streakGarden());
+  grid.appendChild(left);
+  var right=div();
+  right.appendChild(div({cls:'sl',txt:'Flowers in your garden'}));
+  var fg=div({css:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(110px,1fr))',gap:'12px'}});
+  for(var i=0;i<S.garden.length;i++){
+    (function(gf){
+      var flower=flById(gf.flower);
+      var c=div({css:{background:'#fff',borderRadius:'16px',padding:'14px 8px 16px',border:'1.5px solid #F0E4DA',textAlign:'center'}});
+      c.appendChild(div({css:{display:'flex',justifyContent:'center'}},[flSVG(flower.id,64)]));
+      c.appendChild(div({css:{fontSize:'12px',fontWeight:'800',color:'#3B1F0F',marginTop:'8px'},txt:flower.name}));
+      c.appendChild(div({css:{fontSize:'10px',color:'#9CA3AF'},txt:'from '+gf.from}));
+      fg.appendChild(c);
+    })(S.garden[i]);
+  }
+  for(var i=S.garden.length;i<9;i++)fg.appendChild(div({css:{background:'#FAFAFA',borderRadius:'16px',border:'1.5px dashed #F0E4DA',minHeight:'120px',display:'flex',alignItems:'center',justifyContent:'center'}},[div({css:{fontSize:'24px',opacity:'.15'},txt:'🌱'})]));
+  right.appendChild(fg);
+  grid.appendChild(right);
+  body.appendChild(grid);
+}
+
+function streakGarden(){
+  var prog=Math.min(S.sendCount||1,5);
+  var w=div({cls:'card',css:{border:'1.5px solid #86EFAC'}});
+  var top=div({css:{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'12px'}});
+  top.appendChild(div(null,[div({css:{fontSize:'14px',fontWeight:'700',color:'#3B1F0F'},txt:'🌱 Your Secret Seed'}),div({css:{fontSize:'12px',color:'#9CA3AF',marginTop:'2px'},txt:'Send flowers to grow it'})]));
+  var cnt=div({css:{textAlign:'right'}});
+  cnt.appendChild(div({css:{fontSize:'28px',fontWeight:'800',color:'#22C55E'},html:prog+'<span style="font-size:14px;color:#9CA3AF">/5</span>'}));
+  top.appendChild(cnt);w.appendChild(top);
+  var dots=div({css:{display:'flex',justifyContent:'center',gap:'10px',marginTop:'10px'}});
+  for(var i=0;i<5;i++)dots.appendChild(div({css:{width:'32px',height:'32px',borderRadius:'50%',background:i<prog?'#86EFAC':'#F0FDF4',border:'2px solid '+(i<prog?'#22C55E':'#D1FAE5'),display:'flex',alignItems:'center',justifyContent:'center',fontSize:'14px'},txt:i<prog?'✓':''}));
+  w.appendChild(dots);
+  if(prog>=5)w.appendChild(div({css:{marginTop:'14px',textAlign:'center',background:'linear-gradient(135deg,#818CF8,#C4B5FD)',borderRadius:'16px',padding:'12px'}},[div({css:{fontSize:'15px',fontWeight:'800',color:'#fff'},txt:'✨ You grew a Moonflower!'})]));
+  return w;
+}
+
+// ════════════════════════════════════════════════════════════
+//  BOARD SCREEN
+// ════════════════════════════════════════════════════════════
+var BCATS=[{id:'life',label:"How I've Been",e:'🌤️',col:'#A5B4FC',bg:'#EEF2FF',ph:"Spill the tea on your life lately..."},{id:'crush',label:'Love Life',e:'💘',col:'#F9A8D4',bg:'#FFF0F6',ph:'Okay so I may have a tiny crush on...'},{id:'project',label:"What I'm Making",e:'🛠️',col:'#86EFAC',bg:'#F0FDF4',ph:"I've been working on this thing..."},{id:'moment',label:'A Moment',e:'📸',col:'#FCD34D',bg:'#FFFBEB',ph:'This happened and I had to share it...'},{id:'thought',label:'Random Thought',e:'😂',col:'#FCA5A5',bg:'#FFF1F2',ph:'Okay this might be unhinged but...'}];
+
+function boardScreen(){
+  var sc=div();
+  var hrow=div({css:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'20px'}});
+  hrow.appendChild(div(null,[div({cls:'ey',txt:'RingMe! · Board'}),div({cls:'pt',txt:'The Board 📌'})]));
+  hrow.appendChild(btn({cls:'btn-pink',txt:'+ Pin Something',click:function(){S.boardPost=true;S.postCat='';S.postTxt='';render();}}));
+  sc.appendChild(hrow);
+  var frow=div({css:{display:'flex',gap:'8px',flexWrap:'wrap',marginBottom:'20px'}});
+  var filters=[{id:'all',name:'All Posts',e:'👀',col:'#F9A8D4'}];
+  for(var i=0;i<S.friends.length;i++)filters.push({id:S.friends[i].name,name:S.friends[i].name,e:S.friends[i].emoji,col:S.friends[i].color});
+  filters.push({id:S.me.name,name:'Mine',e:S.me.emoji,col:S.me.color});
+  for(var i=0;i<filters.length;i++){
+    (function(f){frow.appendChild(btn({css:{display:'flex',alignItems:'center',gap:'6px',padding:'7px 16px',borderRadius:'22px',border:'2px solid '+(S.boardFilter===f.id?f.col:'#E5D5C8'),background:S.boardFilter===f.id?f.col+'33':'#fff',fontSize:'13px',fontWeight:S.boardFilter===f.id?'800':'600',color:'#3B1F0F',boxShadow:S.boardFilter===f.id?'0 2px 0 '+f.col:'none'},html:f.e+' '+f.name,click:function(){S.boardFilter=f.id;render();}}));})(filters[i]);
+  }
+  sc.appendChild(frow);
+  if(S.boardPost)sc.appendChild(boardPostModal());
+  var filtered=[];for(var i=0;i<S.pins.length;i++)if(S.boardFilter==='all'||S.pins[i].auth===S.boardFilter)filtered.push(S.pins[i]);
+  // 3-column masonry-ish
+  var cols=[[],[],[]];for(var i=0;i<filtered.length;i++)cols[i%3].push(filtered[i]);
+  var cb=div({cls:'cb'});
+  var grd=div({css:{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'18px',alignItems:'start'}});
+  var PCOLS=['#EF4444','#F97316','#EAB308','#22C55E','#3B82F6','#8B5CF6','#EC4899'];
+  for(var ci=0;ci<3;ci++){
+    (function(colPins,offset){
+      var col=div({css:{display:'flex',flexDirection:'column',gap:'18px',marginTop:offset===1?'28px':offset===2?'14px':'0'}});
+      for(var i=0;i<colPins.length;i++){
+        (function(pin,i){
+          var cat=null;for(var j=0;j<BCATS.length;j++)if(BCATS[j].id===pin.cat){cat=BCATS[j];break;}if(!cat)cat=BCATS[0];
+          var pc=PCOLS[(i+offset*3)%PCOLS.length];
+          var card=div({cls:'pin-card',css:{background:pin.bg,border:'1px solid '+pin.col+'44',transform:'rotate('+pin.rot+'deg)'}});
+          var ph=div({css:{position:'absolute',top:'-10px',left:'50%',transform:'translateX(-50%)',zIndex:'2',display:'flex',flexDirection:'column',alignItems:'center'}});
+          ph.appendChild(div({css:{width:'16px',height:'16px',borderRadius:'50%',background:pc,boxShadow:'0 2px 6px '+pc+'88'}}));
+          ph.appendChild(div({css:{width:'3px',height:'8px',background:pc,opacity:'.6'}}));
+          var tape=div({cls:'tape'});
+          if(pin.tape==='left'){tape.style.top='-10px';tape.style.left='18px';tape.style.transform='rotate(-6deg)';}
+          else if(pin.tape==='right'){tape.style.top='-10px';tape.style.right='18px';tape.style.transform='rotate(6deg)';}
+          else{tape.style.top='-10px';tape.style.left='50%';tape.style.transform='translateX(-50%) rotate(-2deg)';}
+          card.appendChild(ph);card.appendChild(tape);
+          card.appendChild(div({css:{display:'flex',alignItems:'center',gap:'5px',marginBottom:'10px'}},[span({css:{fontSize:'14px'},txt:cat.e}),span({css:{fontSize:'10px',fontWeight:'700',letterSpacing:'1px',color:pin.col,textTransform:'uppercase'},txt:cat.label})]));
+          card.appendChild(div({css:{fontSize:'16px',fontFamily:"'Caveat',cursive",color:'#2D1810',lineHeight:'1.6',fontWeight:'600',marginBottom:'10px'},txt:pin.txt}));
+          var footer=div({css:{display:'flex',justifyContent:'space-between',alignItems:'center',borderTop:'1px solid '+pin.col+'33',paddingTop:'9px'}});
+          footer.appendChild(div({css:{display:'flex',alignItems:'center',gap:'5px'}},[span({css:{fontSize:'14px'},txt:pin.ae}),span({css:{fontSize:'12px',fontWeight:'700',color:'#5A3A2A'},txt:pin.auth}),span({css:{fontSize:'10px',color:'#9CA3AF'},txt:' · '+pin.time})]));
+          (function(p){footer.appendChild(btn({css:{display:'flex',alignItems:'center',gap:'3px',padding:'3px 8px',fontSize:'13px',color:p.liked?'#EC4899':'#9CA3AF',fontWeight:'700'},html:(p.liked?'❤️':'🤍')+p.likes,click:function(){p.liked=!p.liked;p.likes+=p.liked?1:-1;render();}}));})(pin);
+          card.appendChild(footer);col.appendChild(card);
+        })(colPins[i],i);
+      }
+      grd.appendChild(col);
+    })(cols[ci],ci);
+  }
+  cb.appendChild(grd);sc.appendChild(cb);
+  return sc;
+}
+
+function boardPostModal(){
+  var mbg=div({cls:'mbg'});
+  mbg.addEventListener('click',function(){S.boardPost=false;render();});
+  var sh=div({cls:'msh'});sh.addEventListener('click',function(e){e.stopPropagation();});
+  var tr=div({css:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'16px'}});
+  tr.appendChild(div({css:{fontSize:'18px',fontWeight:'800',color:'#2D1810'},txt:'Pin something to the board 📌'}));
+  tr.appendChild(btn({css:{background:'#F0E4DA',borderRadius:'50%',width:'34px',height:'34px',fontSize:'15px',color:'#9CA3AF',display:'flex',alignItems:'center',justifyContent:'center'},txt:'✕',click:function(){S.boardPost=false;render();}}));
+  sh.appendChild(tr);
+  var cr=div({css:{display:'flex',gap:'10px',flexWrap:'wrap',marginBottom:'16px'}});
+  for(var i=0;i<BCATS.length;i++){
+    (function(c){cr.appendChild(btn({css:{display:'flex',alignItems:'center',gap:'6px',padding:'9px 14px',borderRadius:'22px',border:'2px solid '+(S.postCat===c.id?c.col:'#F0E4DA'),background:S.postCat===c.id?c.bg:'#fff',fontSize:'13px',fontWeight:'700',color:S.postCat===c.id?c.col:'#9CA3AF'},html:c.e+' '+c.label,click:function(){S.postCat=c.id;render();}}));})(BCATS[i]);
+  }
+  sh.appendChild(cr);
+  if(S.postCat){
+    var cat=null;for(var i=0;i<BCATS.length;i++)if(BCATS[i].id===S.postCat){cat=BCATS[i];break;}
+    var ta=mk('textarea',{css:{width:'100%',fontSize:'20px',color:'#2D1810',minHeight:'90px',fontWeight:'600',padding:'14px',borderRadius:'14px',background:cat.bg,border:'2px solid '+cat.col,marginBottom:'14px',fontFamily:"'Caveat',cursive",display:'block'},placeholder:cat.ph,input:function(e){S.postTxt=e.target.value;}});
+    ta.value=S.postTxt||'';sh.appendChild(ta);
+    sh.appendChild(btn({css:{width:'100%',padding:'15px',background:S.postTxt.trim()?'linear-gradient(135deg,#F9A8D4,#FBCFE8)':'#F0E4DA',border:'2px solid '+(S.postTxt.trim()?'#EC4899':'#E5D5C8'),borderRadius:'32px',fontSize:'15px',fontWeight:'800',color:S.postTxt.trim()?'#9D174D':'#9CA3AF'},txt:'📌 Pin it!',click:function(){
+      if(!S.postTxt.trim())return;
+      var rots=[-4,-2,0,2,3];
+      S.pins.unshift({id:Date.now(),auth:S.me.name,ae:S.me.emoji,cat:S.postCat,col:cat.col,bg:cat.bg,txt:S.postTxt,time:'just now',likes:0,liked:false,rot:rots[Math.floor(Math.random()*5)],tape:['left','right','center'][Math.floor(Math.random()*3)]});
+      S.boardPost=false;S.postTxt='';S.postCat='';render();
+    }}));
+  }
+  mbg.appendChild(sh);return mbg;
+}
+
+// ════════════════════════════════════════════════════════════
+//  PROMPTS SCREEN
+// ════════════════════════════════════════════════════════════
+var WPROMS=[{id:'w1',type:'funny',e:'😂',tag:'Funny',txt:'If our friendship was a movie genre, what would it be and why?',hint:'Think about your most chaotic moments...'},{id:'w2',type:'memory',e:'📸',tag:'Memory',txt:'Describe a moment with this friend using only 5 words.',hint:'Make it specific — the stranger the better!'},{id:'w3',type:'funny',e:'🤣',tag:'Funny',txt:'What animal would your friend be and what would their daily routine look like?',hint:'Be honest. Be specific. Be lovingly mean.'}];
+var MPROMS=[{id:'m1',type:'memory',e:'🎞️',tag:'Memory',txt:'If you could relive one day you spent together, which would it be?',hint:'The messy days often make the best memories...'},{id:'m2',type:'funny',e:'🏆',tag:'Funny',txt:'What award would you give your friend? Write their acceptance speech.',hint:'Make the award as niche as possible.'}];
+var FRIEND_ANS={w1:{fid:1,a:"Definitely a disaster comedy — remember when we got on the wrong train?"},w2:{fid:2,a:"Laughing until we cried"},m1:{fid:1,a:"That rainy afternoon stuck at a tiny cafe for 6 hours"},m2:{fid:2,a:'Award: "Most Likely to Make Everything an Adventure"'}};
+var BADGES=[{id:'weekly-duo',name:'Weekly Duo',e:'✨',col:'#86EFAC'},{id:'memory-keeper',name:'Memory Keeper',e:'📸',col:'#F9A8D4'},{id:'comedian',name:'Class Clown',e:'😂',col:'#FCD34D'},{id:'campfire',name:'Campfire Badge',e:'🏕️',col:'#FCA5A5'},{id:'og-friends',name:'Original Besties',e:'💕',col:'#FBCFE8'}];
+
+function promptsScreen(){
+  var sc=div();
+  var friendAns=['w1','w2','m1','m2'];
+  if(S.pMode==='answering'&&S.pActive){
+    var ov=div({css:{position:'fixed',inset:'0',zIndex:'50',background:'rgba(253,246,240,.97)',backdropFilter:'blur(12px)',display:'flex',flexDirection:'column',alignItems:'center',padding:'52px 20px 20px',overflowY:'auto',animation:'slideUp .3s ease'}});
+    ov.appendChild(btn({css:{fontSize:'14px',color:'#C084FC',fontWeight:'700',marginBottom:'16px',display:'block'},txt:'← Back to prompts',click:function(){S.pMode='list';render();}}));
+    var card=div({css:{background:'#fff',borderRadius:'24px',border:'1.5px solid #F0E4DA',padding:'36px 40px',maxWidth:'620px',width:'100%',boxShadow:'0 8px 32px rgba(200,120,100,.08)'}});
+    card.appendChild(div({css:{fontSize:'17px',fontWeight:'800',color:'#3B1F0F',lineHeight:'1.5',marginBottom:'6px'},txt:S.pActive.txt}));
+    card.appendChild(div({css:{fontSize:'13px',color:'#9CA3AF',fontStyle:'italic',marginBottom:'20px'},txt:S.pActive.hint}));
+    var ta=mk('textarea',{css:{width:'100%',background:'#FAFAFA',border:'2px solid #F0E4DA',borderRadius:'14px',padding:'16px',fontSize:'22px',fontFamily:"'Caveat',cursive",color:'#3B1F0F',lineHeight:'1.6',minHeight:'220px',display:'block'},placeholder:'Write your answer here... ✍️',input:function(e){S.pWrite=e.target.value;}});
+    ta.value=S.pWrite||'';card.appendChild(ta);
+    card.appendChild(btn({cls:'btn-pink',css:{marginTop:'20px'},txt:'💌 Submit my answer',click:function(){
+      if(!(S.pWrite||'').trim())return;
+      S.pAnswered[S.pActive.id]=S.pWrite;
+      if(!has(S.pDone,S.pActive.id))S.pDone.push(S.pActive.id);
+      if(S.pActive.type==='memory')S.badges['memory-keeper']=true;else S.badges.comedian=true;
+      if(has(friendAns,S.pActive.id)){S.pPolaroid=S.pActive;S.pMode='polaroid';}else S.pMode='list';
+      S.pWrite='';render();
+    }}));
+    ov.appendChild(card);sc.appendChild(ov);return sc;
+  }
+  if(S.pMode==='polaroid'&&S.pPolaroid){
+    var p=S.pPolaroid,fa=FRIEND_ANS[p.id],friend=fa?frById(fa.fid)||S.friends[0]:S.friends[0];
+    var badge=null;for(var i=0;i<BADGES.length;i++)if(BADGES[i].id===(p.type==='memory'?'memory-keeper':'comedian')){badge=BADGES[i];break;}
+    var ov=div({css:{position:'fixed',inset:'0',zIndex:'50',background:'rgba(253,246,240,.97)',backdropFilter:'blur(12px)',display:'flex',flexDirection:'column',alignItems:'center',overflowY:'auto',padding:'60px 20px 40px',animation:'fadeIn .3s ease'}});
+    ov.appendChild(btn({css:{position:'fixed',top:'22px',right:'22px',background:'#fff',border:'2px solid #F0E4DA',borderRadius:'50%',width:'40px',height:'40px',fontSize:'18px',color:'#9CA3AF',display:'flex',alignItems:'center',justifyContent:'center'},txt:'✕',click:function(){S.pMode='list';render();}}));
+    ov.appendChild(div({css:{textAlign:'center',marginBottom:'24px'},html:'<div style="font-size:11px;letter-spacing:3px;color:#C084FC;font-weight:700;text-transform:uppercase;margin-bottom:6px">📸 Prompt Polaroid Unlocked!</div><div style="font-size:20px;font-weight:800;color:#3B1F0F;line-height:1.4;max-width:480px">'+p.txt+'</div>'}));
+    var pols=div({css:{display:'flex',gap:'20px',justifyContent:'center',marginBottom:'32px',flexWrap:'wrap'}});
+    var polData=[{lbl:'You 🌺',ans:S.pAnswered[p.id]||'...',rot:'-2deg'},{lbl:friend.emoji+' '+friend.name,ans:(fa?fa.a:null)||'✨',rot:'3deg'}];
+    for(var i=0;i<polData.length;i++){
+      (function(pp){
+        var pol=div({css:{background:'#fff',borderRadius:'4px',padding:'18px 18px 56px',boxShadow:'0 8px 32px rgba(0,0,0,.12)',width:'200px',flexShrink:'0',transform:'rotate('+pp.rot+')'}});
+        pol.appendChild(div({css:{background:'linear-gradient(135deg,#FFF0F6,#FDE8F6)',borderRadius:'2px',padding:'14px 12px',marginBottom:'12px',minHeight:'130px',display:'flex',alignItems:'center',justifyContent:'center'}},[div({css:{fontSize:'16px',fontFamily:"'Caveat',cursive",color:'#3B1F0F',lineHeight:'1.6',textAlign:'center',fontWeight:'600'},txt:pp.ans})]));
+        pol.appendChild(div({css:{fontFamily:"'Caveat',cursive",fontSize:'17px',color:'#6B7280',textAlign:'center'},txt:pp.lbl}));
+        pols.appendChild(pol);
+      })(polData[i]);
+    }
+    ov.appendChild(pols);
+    if(badge){
+      var bw=div({css:{animation:'badgePop .8s .5s ease both',textAlign:'center'}});
+      var bc=div({css:{background:'#fff',border:'3px solid '+badge.col,borderRadius:'24px',padding:'24px 36px',boxShadow:'0 6px 0 '+badge.col+'88',display:'inline-block',minWidth:'240px'}});
+      bc.appendChild(div({css:{fontSize:'58px',marginBottom:'10px',animation:'floatUp 2s ease infinite'},txt:badge.e}));
+      bc.appendChild(div({css:{fontSize:'12px',letterSpacing:'2px',color:badge.col,fontWeight:'800',textTransform:'uppercase',marginBottom:'4px'},txt:'Badge Unlocked!'}));
+      bc.appendChild(div({css:{fontSize:'22px',fontWeight:'800',color:'#3B1F0F'},txt:badge.name}));
+      bw.appendChild(bc);
+      bw.appendChild(div({css:{marginTop:'24px'}},[btn({cls:'btn-pink',txt:'Save to scrapbook 📖',click:function(){S.pMode='list';render();}})]));
+      ov.appendChild(bw);
+    }
+    sc.appendChild(ov);return sc;
+  }
+  // List view
+  sc.appendChild(div({css:{marginBottom:'20px'}},[div({cls:'ey',txt:'RingMe! · Prompts'}),div({cls:'pt',txt:'Friend Prompts ✍️'})]));
+  var tabRow=div({css:{display:'flex',gap:'8px',marginBottom:'20px',maxWidth:'360px'}});
+  [['weekly','📅 Weekly'],['monthly','🌙 Monthly']].forEach(function(t){tabRow.appendChild(btn({cls:'tab-btn'+(S.ptab===t[0]?' on':''),txt:t[1],click:function(){S.ptab=t[0];render();}}));});
+  sc.appendChild(tabRow);
+  var done=0;for(var i=0;i<S.pDone.length;i++)if(has(friendAns,S.pDone[i]))done++;
+  var banner=div({css:{background:'linear-gradient(135deg,#EEF2FF,#FFF0F6)',border:'1.5px solid #A5B4FC',borderRadius:'18px',padding:'16px 22px',marginBottom:'24px',display:'flex',alignItems:'center',gap:'18px',maxWidth:'600px'}});
+  banner.appendChild(div({css:{fontSize:'42px',animation:'wiggle 3s ease infinite'},txt:'📸'}));
+  banner.appendChild(div(null,[div({css:{fontSize:'15px',fontWeight:'800',color:'#3B1F0F'},txt:done===0?'Answer your first prompt to unlock a polaroid!':done+' polaroid'+(done>1?'s':'')+' unlocked! 🎉'}),div({css:{fontSize:'12px',color:'#9CA3AF',marginTop:'2px'},txt:'When you both answer → a polaroid photo appears 🎞️'})]));
+  banner.appendChild(div({css:{fontSize:'28px',fontWeight:'800',color:'#6366F1',marginLeft:'auto'},txt:done}));
+  sc.appendChild(banner);
+  var proms=S.ptab==='weekly'?WPROMS:MPROMS;
+  var pgrid=div({css:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(320px,1fr))',gap:'18px'}});
+  for(var i=0;i<proms.length;i++){
+    (function(p){
+      var isAns=has(S.pDone,p.id),fAns=has(friendAns,p.id),both=isAns&&fAns;
+      var tagCol={funny:'#FCD34D',memory:'#A5B4FC'},tagBg={funny:'#FFFBEB',memory:'#EEF2FF'};
+      var card=div({css:{background:'#fff',borderRadius:'22px',border:'2px solid '+(both?'#86EFAC':isAns?'#F9A8D4':'#F0E4DA'),boxShadow:both?'0 4px 0 #86EFAC':isAns?'0 4px 0 #F9A8D4':'0 2px 8px rgba(0,0,0,.05)',padding:'22px 24px'}});
+      var top=div({css:{display:'flex',alignItems:'center',gap:'10px',marginBottom:'14px'}});
+      top.appendChild(div({css:{fontSize:'26px'},txt:p.e}));
+      top.appendChild(div({css:{flex:'1'}},[span({css:{fontSize:'10px',fontWeight:'800',letterSpacing:'1.5px',textTransform:'uppercase',background:tagBg[p.type]||'#EEF2FF',color:tagCol[p.type]||'#A5B4FC',borderRadius:'8px',padding:'3px 10px'},txt:p.tag})]));
+      var dots=div({css:{display:'flex',gap:'5px'}});
+      dots.appendChild(div({css:{width:'12px',height:'12px',borderRadius:'50%',background:isAns?'#22C55E':'#E5E7EB',border:'2px solid #fff',boxShadow:'0 0 0 1px #D1D5DB'}}));
+      dots.appendChild(div({css:{width:'12px',height:'12px',borderRadius:'50%',background:fAns?'#22C55E':'#E5E7EB',border:'2px solid #fff',boxShadow:'0 0 0 1px #D1D5DB'}}));
+      top.appendChild(dots);card.appendChild(top);
+      card.appendChild(div({css:{fontSize:'16px',fontWeight:'700',color:'#3B1F0F',lineHeight:'1.5',marginBottom:'6px'},txt:p.txt}));
+      card.appendChild(div({css:{fontSize:'13px',color:'#9CA3AF',fontStyle:'italic',marginBottom:'16px'},txt:p.hint}));
+      if(both)card.appendChild(btn({css:{width:'100%',background:'linear-gradient(135deg,#86EFAC,#4ADE80)',border:'2px solid #22C55E',borderRadius:'28px',padding:'12px',fontSize:'14px',fontWeight:'800',color:'#14532D',boxShadow:'0 3px 0 #86EFAC'},txt:'📸 See your polaroid!',click:function(){S.pPolaroid=p;S.pMode='polaroid';render();}}));
+      else if(isAns)card.appendChild(div({css:{background:'#F0FDF4',border:'1.5px solid #86EFAC',borderRadius:'14px',padding:'11px 16px',fontSize:'13px',color:'#14532D',fontWeight:'600',textAlign:'center'},txt:'✓ Your answer is in! Waiting for your friend...'}));
+      else card.appendChild(btn({cls:'btn-outline',css:{width:'100%',justifyContent:'center'},txt:'✍️ Answer this prompt',click:function(){S.pActive=p;S.pMode='answering';S.pWrite='';render();}}));
+      pgrid.appendChild(card);
+    })(proms[i]);
+  }
+  sc.appendChild(pgrid);
+  return sc;
+}
+
+// ════════════════════════════════════════════════════════════
+//  SETTINGS SCREEN
+// ════════════════════════════════════════════════════════════
+function settingsScreen(){
+  var sc=div();
+  if(S.emojiPickFor!==''){
+    var mbg=div({cls:'mbg'});mbg.addEventListener('click',function(){S.emojiPickFor='';render();});
+    var sh=div({cls:'msh'});sh.addEventListener('click',function(e){e.stopPropagation();});
+    sh.appendChild(div({css:{fontSize:'16px',fontWeight:'800',color:'#2D1810',marginBottom:'18px'},txt:'Pick an emoji'}));
+    var eg=div({css:{display:'flex',flexWrap:'wrap',gap:'10px'}});
+    for(var i=0;i<EMOJIS.length;i++){
+      (function(e,forId){eg.appendChild(btn({css:{width:'46px',height:'46px',borderRadius:'12px',background:'#fff',border:'2px solid #F0E4DA',fontSize:'24px',display:'flex',alignItems:'center',justifyContent:'center'},txt:e,click:function(){
+        if(forId==='me')S.me.emoji=e;else{var f=frById(parseInt(forId));if(f)f.emoji=e;}
+        S.emojiPickFor='';render();
+      }}));})(EMOJIS[i],S.emojiPickFor);
+    }
+    sh.appendChild(eg);mbg.appendChild(sh);sc.appendChild(mbg);
+  }
+  sc.appendChild(div({css:{marginBottom:'22px'}},[div({cls:'ey',txt:'RingMe! · Setup'}),div({cls:'pt',txt:'Customise Your Cockpit ⚙️'})]));
+  var tabRow=div({css:{display:'flex',gap:'8px',marginBottom:'24px',maxWidth:'560px'}});
+  [['me','🌺 My Profile'],['friends','💕 Friends'],['meet','📹 Meet'],['about','ℹ️ About']].forEach(function(t){tabRow.appendChild(btn({cls:'tab-btn'+(S.stab===t[0]?' on':''),txt:t[1],click:function(){S.stab=t[0];S.sEditFriend=0;render();}}));});
+  sc.appendChild(tabRow);
+  var body=div();
+  if(S.stab==='me')renderMeTab(body);
+  if(S.stab==='friends')renderFriendsTab(body);
+  if(S.stab==='meet')renderMeetTab(body);
+  if(S.stab==='about')renderAboutTab(body);
+  sc.appendChild(body);return sc;
+}
+
+function sInput(label,value,ph,maxLen,onChange){
+  var card=div({cls:'card'});
+  card.appendChild(div({cls:'sl',txt:label}));
+  var i=inp({css:{fontSize:'20px',color:'#2D1810',fontWeight:'600',borderBottom:'2px solid #F0E4DA',paddingBottom:'4px',display:'block',width:'100%'},placeholder:ph,maxlength:maxLen,value:value||''});
+  i.addEventListener('input',function(e){onChange(e.target.value);});
+  card.appendChild(i);return card;
+}
+
+function renderMeTab(body){
+  var grid=div({cls:'panel-grid pg-2',css:{maxWidth:'900px'}});
+  var left=div({css:{display:'flex',flexDirection:'column',gap:'16px'}});
+  var avCard=div({cls:'card',css:{display:'flex',alignItems:'center',gap:'20px'}});
+  var avBtn=btn({css:{width:'90px',height:'90px',flexShrink:'0',borderRadius:'50%',background:'linear-gradient(145deg,'+S.me.color+'88,'+S.me.color+'33)',border:'4px solid '+S.me.color,fontSize:'44px',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 4px 16px '+S.me.color+'55',position:'relative'},click:function(){S.emojiPickFor='me';render();}});
+  avBtn.appendChild(div({css:{fontSize:'44px'},txt:S.me.emoji}));
+  avBtn.appendChild(div({css:{position:'absolute',bottom:'0',right:'0',width:'28px',height:'28px',borderRadius:'50%',background:'#fff',border:'2px solid '+S.me.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'13px'},txt:'✏️'}));
+  avCard.appendChild(avBtn);
+  avCard.appendChild(div(null,[div({css:{fontSize:'22px',fontFamily:"'Fredoka One',cursive",color:'#EC4899'},txt:S.me.name}),div({css:{fontSize:'13px',color:'#9CA3AF',marginTop:'2px'},txt:S.me.city}),div({css:{fontSize:'12px',color:'#C084FC',marginTop:'2px'},txt:'Tap to change emoji'})]));
+  left.appendChild(avCard);
+  left.appendChild(sInput('Display Name',S.me.name,'Your name',20,function(v){S.me.name=v;}));
+  left.appendChild(sInput('Home City',S.me.city,'Your city',28,function(v){S.me.city=v;}));
+  left.appendChild(sInput('Birthday',S.me.birthday,'e.g. Jun 15',12,function(v){S.me.birthday=v;}));
+  var bioCard=div({cls:'card'});
+  bioCard.appendChild(div({cls:'sl',txt:'Bio'}));
+  var bTA=mk('textarea',{css:{fontSize:'18px',color:'#2D1810',fontWeight:'600',borderBottom:'2px solid #F0E4DA',paddingBottom:'4px',minHeight:'70px',display:'block',width:'100%'},placeholder:'Tell your friends about yourself...',input:function(e){S.me.bio=e.target.value;}});
+  bTA.value=S.me.bio||'';bioCard.appendChild(bTA);left.appendChild(bioCard);
+  grid.appendChild(left);
+  var right=div({css:{display:'flex',flexDirection:'column',gap:'16px'}});
+  var cCard=div({cls:'card'});
+  cCard.appendChild(div({cls:'sl',txt:'Theme Colour'}));
+  var cGrid=div({css:{display:'flex',flexWrap:'wrap',gap:'12px'}});
+  for(var i=0;i<THEMES.length;i++){
+    (function(c){
+      var b=btn({css:{display:'flex',flexDirection:'column',alignItems:'center',gap:'6px'},click:function(){S.me.color=c.v;render();}});
+      b.appendChild(div({css:{width:'52px',height:'52px',borderRadius:'50%',background:'linear-gradient(135deg,'+c.v+'dd,'+c.v+'88)',border:'4px solid '+(S.me.color===c.v?c.v:'transparent'),boxShadow:S.me.color===c.v?'0 0 0 4px #fff,0 0 0 7px '+c.v:'0 2px 8px '+c.v+'44'}}));
+      b.appendChild(div({css:{fontSize:'11px',color:S.me.color===c.v?c.v:'#9CA3AF',fontWeight:S.me.color===c.v?'800':'500'},txt:c.name}));
+      cGrid.appendChild(b);
+    })(THEMES[i]);
+  }
+  cCard.appendChild(cGrid);right.appendChild(cCard);
+  var ffCard=div({cls:'card'});
+  ffCard.appendChild(div({cls:'sl',txt:'Favourite Flower'}));
+  var ffGrid=div({css:{display:'flex',flexWrap:'wrap',gap:'10px'}});
+  for(var i=0;i<FLOWERS.length;i++){
+    (function(fl){
+      var b=btn({css:{width:'calc(25% - 8px)',padding:'10px 6px 12px',borderRadius:'16px',border:'2px solid '+(S.me.flower===fl.id?fl.col:'#F0E4DA'),background:S.me.flower===fl.id?fl.col+'22':'#fff',textAlign:'center'},click:function(){S.me.flower=fl.id;render();}});
+      b.appendChild(div({css:{display:'flex',justifyContent:'center'}},[flSVG(fl.id,44)]));
+      b.appendChild(div({css:{fontSize:'10px',fontWeight:'700',color:'#3B1F0F',lineHeight:'1.2'},txt:fl.name}));
+      ffGrid.appendChild(b);
+    })(FLOWERS[i]);
+  }
+  ffCard.appendChild(ffGrid);right.appendChild(ffCard);
+
+  // ── FACTORY RESET ──────────────────────────────────────────
+  var resetCard=div({cls:'card',css:{border:'2px solid #FCA5A5',background:'#FFF1F2'}});
+  resetCard.appendChild(div({css:{fontSize:'15px',fontWeight:'800',color:'#DC2626',marginBottom:'6px'},txt:'⚠️ Factory Reset'}));
+  resetCard.appendChild(div({css:{fontSize:'13px',color:'#9CA3AF',marginBottom:'16px'},txt:'Clears your saved profile from localStorage and takes you back to the Account Setup wizard so you can start fresh. Useful for testing the onboarding flow!'}));
+  resetCard.appendChild(btn({cls:'btn-danger',txt:'🗑️ Reset Profile & Re-run Setup',click:function(){
+    if(confirm('Reset your profile and go back to setup? This clears your saved name, city, and preferences from localStorage.')){
+      clearProfile();
+      launchSetup();
+    }
+  }}));
+  right.appendChild(resetCard);
+  // ──────────────────────────────────────────────────────────
+
+  right.appendChild(div({css:{background:'#F0FDF4',border:'1.5px solid #86EFAC',borderRadius:'18px',padding:'14px 20px',textAlign:'center'}},[div({css:{fontSize:'14px',fontWeight:'700',color:'#14532D'},txt:'✅ All changes save automatically while you edit!'})]));
+  grid.appendChild(right);body.appendChild(grid);
+}
+
+function renderFriendsTab(body){
+  if(S.sEditFriend){
+    var f=frById(S.sEditFriend);
+    body.appendChild(btn({css:{fontSize:'14px',color:'#C084FC',fontWeight:'700',padding:'0',marginBottom:'12px'},txt:'← Back to friends',click:function(){S.sEditFriend=0;render();}}));
+    var grid=div({cls:'panel-grid pg-2',css:{maxWidth:'900px'}});
+    var left=div({css:{display:'flex',flexDirection:'column',gap:'14px'}});
+    var avCard=div({cls:'card',css:{display:'flex',alignItems:'center',gap:'16px'}});
+    var avBtn=btn({css:{width:'80px',height:'80px',flexShrink:'0',borderRadius:'50%',background:'linear-gradient(145deg,'+f.color+'88,'+f.color+'33)',border:'4px solid '+f.color,fontSize:'38px',display:'flex',alignItems:'center',justifyContent:'center',position:'relative'},click:function(){S.emojiPickFor=String(f.id);render();}});
+    avBtn.appendChild(div({css:{fontSize:'38px'},txt:f.emoji}));
+    avBtn.appendChild(div({css:{position:'absolute',bottom:'0',right:'0',width:'24px',height:'24px',borderRadius:'50%',background:'#fff',border:'2px solid '+f.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px'},txt:'✏️'}));
+    avCard.appendChild(avBtn);avCard.appendChild(div({css:{fontSize:'19px',fontWeight:'800',color:'#2D1810'},txt:f.name}));
+    left.appendChild(avCard);
+    left.appendChild(sInput('Name',f.name,"Friend's name",20,function(v){f.name=v;}));
+    left.appendChild(sInput('City',f.city,'Their city',28,function(v){f.city=v;}));
+    left.appendChild(sInput('Timezone (IANA)',f.tz,'e.g. Asia/Tokyo',48,function(v){f.tz=v;}));
+    left.appendChild(sInput('Birthday',f.bday,'e.g. Mar 14',12,function(v){f.bday=v;}));
+    grid.appendChild(left);
+    var right=div({css:{display:'flex',flexDirection:'column',gap:'14px'}});
+    var cCard=div({cls:'card'});cCard.appendChild(div({cls:'sl',txt:'Profile Colour'}));
+    var cRow=div({css:{display:'flex',gap:'10px',flexWrap:'wrap'}});
+    for(var i=0;i<THEMES.length;i++){
+      (function(c){cRow.appendChild(btn({css:{width:'44px',height:'44px',borderRadius:'50%',background:c.v,border:'4px solid '+(f.color===c.v?'#2D1810':'transparent'),boxShadow:f.color===c.v?'0 0 0 2px #fff,0 0 0 5px '+c.v:'none'},click:function(){f.color=c.v;f.soft=c.v+'22';render();}}));})(THEMES[i]);
+    }
+    cCard.appendChild(cRow);right.appendChild(cCard);
+    grid.appendChild(right);body.appendChild(grid);
+  } else {
+    body.appendChild(div({cls:'sl',css:{marginBottom:'14px'},txt:'Your Friends 💕'}));
+    var fg=div({css:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:'14px',maxWidth:'900px',marginBottom:'24px'}});
+    for(var i=0;i<S.friends.length;i++){
+      (function(f){
+        fg.appendChild(btn({css:{display:'flex',alignItems:'center',gap:'16px',background:'#fff',border:'1.5px solid '+f.color+'66',borderRadius:'20px',padding:'16px 18px',width:'100%',textAlign:'left',cursor:'pointer',boxShadow:'0 2px 8px rgba(0,0,0,.04)'},click:function(){S.sEditFriend=f.id;render();}},
+          [div({css:{width:'56px',height:'56px',flexShrink:'0',borderRadius:'50%',background:'linear-gradient(145deg,'+f.color+'88,'+f.color+'33)',border:'3px solid '+f.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'28px'},txt:f.emoji}),
+           div({css:{flex:'1'}},[div({css:{fontSize:'16px',fontWeight:'800',color:'#2D1810'},txt:f.name}),div({css:{fontSize:'12px',color:'#9CA3AF',marginTop:'2px'},txt:'📍 '+f.city}),div({css:{fontSize:'11px',color:'#9CA3AF'},txt:'🌐 '+f.tz})]),
+           div({css:{fontSize:'14px',color:'#C084FC',fontWeight:'700'},txt:'Edit →'})]
+        ));
+      })(S.friends[i]);
+    }
+    body.appendChild(fg);
+    body.appendChild(div({css:{background:'linear-gradient(135deg,#EEF2FF,#FFF0F6)',border:'1.5px dashed #A5B4FC',borderRadius:'18px',padding:'20px 24px',maxWidth:'480px'}},
+      [div({css:{fontSize:'14px',fontWeight:'700',color:'#6366F1',marginBottom:'4px'},txt:'💡 Tip: Use real IANA timezones for accurate overlap!'}),
+       div({css:{fontSize:'12px',color:'#9CA3AF',lineHeight:'1.6'},txt:'Examples: Asia/Tokyo · Europe/London · America/New_York · America/Sao_Paulo'})]
+    ));
+  }
+}
+
+function renderMeetTab(body){
+  var grid=div({cls:'panel-grid pg-2',css:{maxWidth:'900px'}});
+  var left=div({css:{display:'flex',flexDirection:'column',gap:'16px'}});
+  var card=div({cls:'card'});
+  card.appendChild(div({css:{fontSize:'17px',fontWeight:'800',color:'#2D1810',marginBottom:'6px'},txt:'📹 Your Google Meet Room'}));
+  card.appendChild(div({css:{fontSize:'13px',color:'#9CA3AF',marginBottom:'18px',lineHeight:'1.6'},txt:'Paste your permanent Meet link here. Go to meet.google.com → New meeting → Get a link to share.'}));
+  var li=inp({css:{fontSize:'16px',color:'#2D1810',fontWeight:'600',borderBottom:'2px solid #A5B4FC',paddingBottom:'6px',width:'100%',display:'block'},placeholder:'https://meet.google.com/abc-defg-hij',value:S.meetLink||''});
+  li.addEventListener('input',function(e){S.meetLink=e.target.value;});
+  card.appendChild(li);
+  card.appendChild(div({css:{marginTop:'10px',fontSize:'12px',color:'#22C55E',fontWeight:'600'},txt:'✅ Saved — used automatically when you dial in'}));
+  left.appendChild(card);
+  var testBtn=mk('a',{href:S.meetLink||'https://meet.google.com/new',target:'_blank',css:{display:'flex',alignItems:'center',justifyContent:'center',gap:'14px',background:'linear-gradient(135deg,#1A73E8,#1967D2)',borderRadius:'32px',padding:'18px 32px',boxShadow:'0 6px 0 #1558B0',width:'100%'}},
+    [span({css:{fontSize:'24px'},txt:'📹'}),span({css:{fontSize:'17px',fontWeight:'800',color:'#fff'},txt:'Test your Meet link'})]);
+  left.appendChild(testBtn);grid.appendChild(left);
+  var right=div();
+  right.appendChild(div({css:{background:'#FFF0F6',border:'1.5px solid #F9A8D4',borderRadius:'18px',padding:'20px 24px'}},
+    [div({css:{fontSize:'14px',fontWeight:'700',color:'#9D174D',marginBottom:'10px'},txt:'💡 How to get a permanent link:'}),
+     div({css:{fontSize:'13px',color:'#6B7280',lineHeight:'1.9'},html:'1. Go to <strong>meet.google.com</strong><br>2. Click "New meeting"<br>3. Choose "Get a link to share"<br>4. Copy and paste the link above'})]
+  ));
+  grid.appendChild(right);body.appendChild(grid);
+}
+
+function renderAboutTab(body){
+  var grid=div({cls:'panel-grid pg-2',css:{maxWidth:'900px'}});
+  var left=div({css:{display:'flex',flexDirection:'column',gap:'16px'}});
+  left.appendChild(div({cls:'card',css:{textAlign:'center',padding:'36px 28px'}},
+    [div({css:{fontSize:'60px',marginBottom:'12px'},txt:'📞'}),
+     div({css:{fontSize:'32px',color:'#EC4899',fontFamily:"'Fredoka One',cursive",textShadow:'2px 3px 0 #F9A8D4',marginBottom:'6px'},txt:'RingMe!'}),
+     div({css:{fontSize:'14px',color:'#9CA3AF',marginBottom:'16px'},txt:'The long-distance friendship cockpit'}),
+     div({css:{background:'#FFF0F6',borderRadius:'16px',padding:'14px',fontSize:'14px',fontFamily:"'Caveat',cursive",color:'#9D174D',lineHeight:'1.7',fontWeight:'600'},txt:'Made with 💕 for friends who are\nfar apart but close at heart.'})]
+  ));
+  grid.appendChild(left);
+  var right=div({css:{display:'flex',flexDirection:'column',gap:'14px'}});
+  right.appendChild(div({css:{background:'linear-gradient(135deg,#FFF7ED,#FEF3C7)',border:'1.5px solid #FCD34D',borderRadius:'20px',padding:'20px 24px'}},
+    [div({css:{fontSize:'14px',fontWeight:'700',color:'#92400E',marginBottom:'10px'},txt:'⌨️ About this app'}),
+     div({css:{fontSize:'13px',color:'#6B7280',lineHeight:'1.9'},html:'RingMe! helps long-distance friends coordinate calls, send virtual flowers, share a corkboard, and answer fun prompts together — all in one cosy space.<br><br>All data lives in your browser. No account needed.'})]
+  ));
+  right.appendChild(div({css:{background:'linear-gradient(135deg,#EEF2FF,#FFF0F6)',border:'1.5px solid #A5B4FC',borderRadius:'20px',padding:'20px 24px'}},
+    [div({css:{fontSize:'14px',fontWeight:'700',color:'#6366F1',marginBottom:'10px'},txt:'💾 Data & Storage'}),
+     div({css:{fontSize:'13px',color:'#6B7280',lineHeight:'1.9'},html:'Your profile is saved to <code style="background:#EEF2FF;padding:2px 6px;border-radius:4px">localStorage</code> under the key <code style="background:#EEF2FF;padding:2px 6px;border-radius:4px">ringme_profile_v1</code>.<br><br>Use the <strong>Factory Reset</strong> button in My Profile → Settings to clear it and re-run the setup wizard anytime.'})]
+  ));
+  grid.appendChild(right);body.appendChild(grid);
+}
+
+// ════════════════════════════════════════════════════════════
+//  BOOT
+// ════════════════════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
